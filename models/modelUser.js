@@ -10,6 +10,10 @@ const User = sequelizePrime.define(
       primaryKey: true,
       autoIncrement: true,
     },
+    lang: {
+      type: Sequelize.STRING(50),
+      allowNull: true
+    },
     username: {
       type: DataTypes.STRING(20),
       allowNull: false,

@@ -10,6 +10,10 @@ const Gallery = sequelizePrime.define(
       primaryKey: true,
       autoIncrement: true,
     },
+    lang: {
+      type: Sequelize.STRING(50),
+      allowNull: true
+    },
     file: {
       type: DataTypes.STRING(255),
       allowNull: true,

@@ -10,6 +10,10 @@ const Merk = sequelizePrime.define(
       primaryKey: true,
       autoIncrement: true,
     },
+    lang: {
+      type: Sequelize.STRING(50),
+      allowNull: true
+    },
     nama: {
       type: DataTypes.STRING(50),
       allowNull: true,

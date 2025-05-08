@@ -10,6 +10,10 @@ const Category = sequelizePrime.define(
       primaryKey: true,
       autoIncrement: true,
     },
+    lang: {
+      type: Sequelize.STRING(50),
+      allowNull: true
+    },
     parent_id: {
       type: DataTypes.INTEGER,
       allowNull: false,

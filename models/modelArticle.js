@@ -10,6 +10,10 @@ const Article = sequelizePrime.define(
       primaryKey: true,
       autoIncrement: true,
     },
+    lang: {
+      type: Sequelize.STRING(50),
+      allowNull: true
+    },
     slug: {
       type: DataTypes.TEXT,
       allowNull: false,

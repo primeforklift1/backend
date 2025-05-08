@@ -7,6 +7,10 @@ module.exports = {
         primaryKey: true,
         autoIncrement: true
       },
+      lang: {
+        type: Sequelize.STRING(50),
+        allowNull: true
+      },
       chat_id: {
         type: Sequelize.INTEGER,
         allowNull: true,
