@@ -55,7 +55,8 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(cors(corsOptions));
+app.use(cors());
+// app.use(cors(corsOptions));
 app.use(helmet.noSniff());
 app.use(helmet.frameguard());
 app.use(helmet.xssFilter());
@@ -162,6 +163,8 @@ function authenticateToken(requiredRole = "Admin") {
 }
 
 const userController = require("./controllers/userController");
+const menuController = require("./controllers/menuController");
+const langController = require("./controllers/langController");
 const sliderController = require("./controllers/sliderController");
 
 app.get("/", limiter, (req, res) => {
@@ -214,6 +217,9 @@ app.delete(
   userController.deleteUser
 );
 
+
+// API Management
+
 // API Slider
 app.get(
   "/admin/slider",
@@ -250,6 +256,18 @@ app.delete(
   limiter,
   authenticateToken("Admin Sistem"),
   sliderController.deleteSlider
+);
+
+// Public API
+app.post(
+  "/api/menu",
+  limiter,
+  menuController.byMenuWhere
+);
+app.get(
+  "/api/language",
+  limiter,
+  langController.language
 );
 
 const server = app.listen(port, "0.0.0.0", () => {
