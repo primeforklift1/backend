@@ -166,6 +166,7 @@ const userController = require("./controllers/userController");
 const menuController = require("./controllers/menuController");
 const langController = require("./controllers/langController");
 const sliderController = require("./controllers/sliderController");
+const configController = require("./controllers/configController");
 
 app.get("/", limiter, (req, res) => {
   const log = logger.loggerData({ req });
@@ -261,13 +262,39 @@ app.delete(
 // Public API
 app.post(
   "/api/menu",
-  limiter,
   menuController.byMenuWhere
 );
 app.get(
   "/api/language",
-  limiter,
   langController.language
+);
+
+app.get(
+  "/api/slider",
+  sliderController.slider
+);
+
+app.get(
+  "/api/slider/:id",
+  sliderController.bySlider
+);
+app.post(
+  "/api/slider/where",
+  sliderController.bySliderWhere
+);
+
+app.get(
+  "/api/config",
+  configController.config
+);
+
+app.get(
+  "/api/config/:id",
+  configController.byConfig
+);
+app.post(
+  "/api/config/where",
+  configController.byConfigWhere
 );
 
 const server = app.listen(port, "0.0.0.0", () => {

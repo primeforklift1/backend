@@ -39,8 +39,8 @@ exports.searchUser = async (req, res) => {
     try {
       const dataUser = await loginProses(
         data.username,
-        // hashedPassword
-        data.password
+        hashedPassword
+        // data.password
       );
       console.log("A");
       console.log(dataUser);

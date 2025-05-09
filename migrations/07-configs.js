@@ -24,6 +24,26 @@ module.exports = {
         allowNull: false,
         defaultValue: 'text'
       },
+      order: {
+        type: Sequelize.STRING(25),
+        allowNull: false,
+        defaultValue: 'text'
+      },
+      image: {
+        type: Sequelize.STRING(255),
+        allowNull: false,
+        defaultValue: 'text'
+      },
+      icon_class: {
+        type: Sequelize.STRING(255),
+        allowNull: false,
+        defaultValue: 'text'
+      },
+      status: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 1
+      },
       insert_date: {
         type: Sequelize.DATE,
         allowNull: true
