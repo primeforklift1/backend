@@ -167,6 +167,7 @@ const menuController = require("./controllers/menuController");
 const langController = require("./controllers/langController");
 const sliderController = require("./controllers/sliderController");
 const configController = require("./controllers/configController");
+const serviceController = require("./controllers/serviceController");
 
 app.get("/", limiter, (req, res) => {
   const log = logger.loggerData({ req });
@@ -295,6 +296,19 @@ app.get(
 app.post(
   "/api/config/where",
   configController.byConfigWhere
+);
+app.get(
+  "/api/service",
+  serviceController.service
+);
+
+app.get(
+  "/api/service/:id",
+  serviceController.byService
+);
+app.post(
+  "/api/service/where",
+  serviceController.byServiceWhere
 );
 
 const server = app.listen(port, "0.0.0.0", () => {
