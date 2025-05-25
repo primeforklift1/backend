@@ -70,4 +70,110 @@ const Article = sequelizePrime.define(
   }
 );
 
-module.exports = {};
+async function addArticle(dataArticle) {
+  try {
+    // Gunakan metode create untuk menambah data ke dalam tabel Article
+    const newArticle = await Article.create(dataArticle);
+
+    if (newArticle) {
+      return {
+        statusCode: 201,
+        status: "Success",
+        message: "Article berhasil ditambahkan!",
+        data: newArticle,
+      };
+    } else {
+      return {
+        statusCode: 400,
+        status: "Bad Request",
+        message: "Gagal menambahkan Article.",
+      };
+    }
+  } catch (error) {
+    console.error(error);
+    return {
+      statusCode: 500,
+      status: "Error",
+      message: "Terjadi kesalahan saat menambahkan Article.",
+      data: error.message,
+    };
+  }
+}
+// Fungsi untuk mengubah Article
+async function updateArticle(id, dataArticle) {
+  try {
+    // Cek apakah Article dengan id yang diberikan ada dalam database
+    const existingDataArticle = await Article.findByPk(id);
+    if (!existingDataArticle) {
+      return {
+        statusCode: 404,
+        status: "Not Found",
+        message: "Data Article tidak ditemukan.",
+      };
+    }
+
+    // Gunakan metode create untuk mengubah data ke dalam tabel Article
+    const updatedArticle = await existingDataArticle.update(dataArticle);
+
+    if (updatedArticle) {
+      return {
+        statusCode: 200,
+        status: "Success",
+        message: "Article berhasil diperbaharui!",
+        data: updatedArticle,
+      };
+    } else {
+      return {
+        statusCode: 400,
+        status: "Bad Request",
+        message: "Gagal memperbaharui Article.",
+      };
+    }
+  } catch (error) {
+    console.error(error);
+    return {
+      statusCode: 500,
+      status: "Error",
+      message: "Terjadi kesalahan saat memperbaharui Article.",
+      data: error.message,
+    };
+  }
+}
+
+// Fungsi untuk menghapus Article
+async function deleteArticle(id) {
+  try {
+    // Cek apakah Article dengan id yang diberikan ada dalam database
+    const existingArticle = await Article.findByPk(id);
+    if (!existingArticle) {
+      return {
+        statusCode: 404,
+        status: "Not Found",
+        message: "Data Article tidak ditemukan.",
+      };
+    }
+
+    // Gunakan metode destroy untuk menghapus data dari tabel Article
+    await existingArticle.destroy();
+
+    return {
+      statusCode: 200,
+      status: "Success",
+      message: "Article berhasil dihapus!",
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      statusCode: 500,
+      status: "Error",
+      message: "Data masih digunakan di Tabel Data Lain!",
+      data: "Data masih digunakan di Tabel Data Lain!",
+    };
+  }
+}
+
+module.exports = {
+  addArticle,
+  updateArticle,
+  deleteArticle,
+};
