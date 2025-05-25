@@ -5,13 +5,13 @@ require("dotenv").config();
 const logger = require("../config/logger");
 
 const {
-    Language,
-    byLanguage,
-    byLanguageWhere,
-    addLanguage,
-    updateLanguage,
-    deleteLanguage,
-} = require("../models/modelLang");
+    merk,
+    byMerk,
+    byMerkWhere,
+    addMerk,
+    updateMerk,
+    deleteMerk,
+} = require("../models/modelMerk");
 
 const response500 = {
     status: "Error",
@@ -22,7 +22,8 @@ const response400 = {
     message: "Bad Request!",
 };
 
-exports.language = async (req, res) => {
+
+exports.merk = async (req, res) => {
     const log = logger.loggerData({ req });
 
     try {
@@ -30,15 +31,15 @@ exports.language = async (req, res) => {
         const page = req.query.page;
         const rowCount = req.query.row_count;
 
-        const dataLanguage = await Language(page, rowCount);
+        const dataMerk = await merk(page, rowCount);
 
         const response = {
-            statusCode: dataLanguage.statusCode,
-            status: dataLanguage.status,
-            message: dataLanguage.message,
+            statusCode: dataMerk.statusCode,
+            status: dataMerk.status,
+            message: dataMerk.message,
             transactioId: log.TransactionID,
-            totalData: dataLanguage.totalData,
-            data: dataLanguage.data,
+            totalData: dataMerk.totalData,
+            data: dataMerk.data,
         };
         logger.loggerData({
             timeStart: log.TimeStamp,
@@ -47,7 +48,7 @@ exports.language = async (req, res) => {
             flag: "STOP",
             message: response.message,
         });
-        res.status(dataLanguage.statusCode).json(response);
+        res.status(dataMerk.statusCode).json(response);
     } catch (error) {
         // console.log(error);
         logger.loggerData({
@@ -62,21 +63,20 @@ exports.language = async (req, res) => {
     }
 };
 
-
-// language by id
-exports.byLanguage = async (req, res) => {
+// merk by id
+exports.byMerk = async (req, res) => {
     const log = logger.loggerData({ req });
     const id = req.params.id;
     if (id) {
         try {
-            const dataLanguage = await byLanguage(id);
+            const dataMerk = await byMerk(id);
 
             const response = {
-                statusCode: dataLanguage.statusCode,
-                status: dataLanguage.status,
-                message: dataLanguage.message,
+                statusCode: dataMerk.statusCode,
+                status: dataMerk.status,
+                message: dataMerk.message,
                 transactionId: log.TransactionID,
-                data: dataLanguage.data,
+                data: dataMerk.data,
             };
             logger.loggerData({
                 timeStart: log.TimeStamp,
@@ -85,7 +85,7 @@ exports.byLanguage = async (req, res) => {
                 flag: "STOP",
                 message: response.message,
             });
-            res.status(dataLanguage.statusCode).json(response);
+            res.status(dataMerk.statusCode).json(response);
         } catch (error) {
             logger.loggerData({
                 timeStart: log.TimeStamp,
@@ -109,32 +109,36 @@ exports.byLanguage = async (req, res) => {
         res.status(400).json(response400);
     }
 };
-// Language by where
-exports.byLanguageWhere = async (req, res) => {
+// Merk by where
+exports.byMerkWhere = async (req, res) => {
     const log = logger.loggerData({ req });
-    const { id, status } = req.body;
+    const { id, lang, status } = req.body;
     // Ambil parameter page dan row_count dari query string
     const page = req.query.page;
     const rowCount = req.query.row_count;
     try {
         let whereClause = {};
-        // Cek jika parameter id_pengguna
+        //   whereClause.lang = 'id';
+        // Cek jika parameter id
         if (id) {
             whereClause.id = id;
         }
-
+        if (lang) {
+            whereClause.lang = lang;
+        }
+        // Cek jika parameter status_aktif
         if (status) {
             whereClause.status = status;
         }
-        const databyLanguageWhere = await byLanguageWhere(whereClause, page, rowCount);
+        const databyMerkWhere = await byMerkWhere(whereClause, page, rowCount);
 
         const response = {
-            statusCode: databyLanguageWhere.statusCode,
-            status: databyLanguageWhere.status,
-            message: databyLanguageWhere.message,
+            statusCode: databyMerkWhere.statusCode,
+            status: databyMerkWhere.status,
+            message: databyMerkWhere.message,
             transactionId: log.TransactionID,
-            totalData: databyLanguageWhere.totalData,
-            data: databyLanguageWhere.data,
+            totalData: databyMerkWhere.totalData,
+            data: databyMerkWhere.data,
         };
         logger.loggerData({
             timeStart: log.TimeStamp,
@@ -143,7 +147,7 @@ exports.byLanguageWhere = async (req, res) => {
             flag: "STOP",
             message: response.message,
         });
-        res.status(databyLanguageWhere.statusCode).json(response);
+        res.status(databyMerkWhere.statusCode).json(response);
     } catch (error) {
         logger.loggerData({
             timeStart: log.TimeStamp,
@@ -157,8 +161,8 @@ exports.byLanguageWhere = async (req, res) => {
     }
 };
 
-// add Language
-exports.addLanguage = async (req, res) => {
+// add Merk
+exports.addMerk = async (req, res) => {
     const log = logger.loggerData({ req });
     const token = req.headers["authorization"];
     const validToken = token.split(" ");
@@ -168,29 +172,25 @@ exports.addLanguage = async (req, res) => {
     });
 
     const {
-        sort_name,
-        name,
-        flag_image,
-        status
+        nama,
+        status,
     } = req.body;
     try {
-        const dataLanguage = {
-            sort_name: sort_name,
-            name: name,
-            flag_image: flag_image,
+        const dataMerk = {
+            nama: nama,
             status: status,
             insert_date: new Date(),
             insert_by: userLogin
         };
-        // console.log(dataLanguage);
-        const dataLanguageAdded = await addLanguage(dataLanguage);
+        // console.log(dataMerk);
+        const dataMerkAdded = await addMerk(dataMerk);
 
         const response = {
-            statusCode: dataLanguageAdded.statusCode,
-            status: dataLanguageAdded.status,
-            message: dataLanguageAdded.message,
+            statusCode: dataMerkAdded.statusCode,
+            status: dataMerkAdded.status,
+            message: dataMerkAdded.message,
             transactioId: log.TransactionID,
-            data: dataLanguageAdded.data,
+            data: dataMerkAdded.data,
         };
 
         logger.loggerData({
@@ -200,7 +200,7 @@ exports.addLanguage = async (req, res) => {
             flag: "STOP",
             message: response.message,
         });
-        res.status(dataLanguageAdded.statusCode).json(response);
+        res.status(dataMerkAdded.statusCode).json(response);
     } catch (error) {
         logger.loggerData({
             timeStart: log.TimeStamp,
@@ -213,8 +213,8 @@ exports.addLanguage = async (req, res) => {
         res.status(500).json(response500);
     }
 };
-// update Language
-exports.updateLanguage = async (req, res) => {
+// update Merk
+exports.updateMerk = async (req, res) => {
     const log = logger.loggerData({ req });
     const token = req.headers["authorization"];
     const validToken = token.split(" ");
@@ -225,27 +225,23 @@ exports.updateLanguage = async (req, res) => {
     // console.log(userLogin);
     const {
         id,
-        sort_name,
-        name,
-        flag_image,
+        nama,
         status,
     } = req.body;
     try {
-        const dataLanguage = {
-            sort_name: sort_name,
-            name: name,
-            flag_image: flag_image,
+        const dataMerk = {
+            nama: nama,
             status: status,
         };
-        // console.log(dataLanguage);
-        const dataLanguageUpdated = await updateLanguage(id, dataLanguage);
+        // console.log(dataMerk);
+        const dataMerkUpdated = await updateMerk(id, dataMerk);
 
         const response = {
-            statusCode: dataLanguageUpdated.statusCode,
-            status: dataLanguageUpdated.status,
-            message: dataLanguageUpdated.message,
+            statusCode: dataMerkUpdated.statusCode,
+            status: dataMerkUpdated.status,
+            message: dataMerkUpdated.message,
             transactioId: log.TransactionID,
-            data: dataLanguageUpdated.data,
+            data: dataMerkUpdated.data,
         };
 
         logger.loggerData({
@@ -255,7 +251,7 @@ exports.updateLanguage = async (req, res) => {
             flag: "STOP",
             message: response.message,
         });
-        res.status(dataLanguageUpdated.statusCode).json(response);
+        res.status(dataMerkUpdated.statusCode).json(response);
     } catch (error) {
         logger.loggerData({
             timeStart: log.TimeStamp,
@@ -269,20 +265,20 @@ exports.updateLanguage = async (req, res) => {
     }
 };
 
-//delete Language by id Language
-exports.deleteLanguage = async (req, res) => {
+//delete Merk by id Merk
+exports.deleteMerk = async (req, res) => {
     const log = logger.loggerData({ req });
     const id = req.params.id;
     if (id) {
         try {
-            const dataLanguageDeleted = await deleteLanguage(id);
+            const dataMerkDeleted = await deleteMerk(id);
 
             const response = {
-                statusCode: dataLanguageDeleted.statusCode,
-                status: dataLanguageDeleted.status,
-                message: dataLanguageDeleted.message,
+                statusCode: dataMerkDeleted.statusCode,
+                status: dataMerkDeleted.status,
+                message: dataMerkDeleted.message,
                 transactioId: log.TransactionID,
-                data: dataLanguageDeleted.data,
+                data: dataMerkDeleted.data,
             };
 
             logger.loggerData({
@@ -292,7 +288,7 @@ exports.deleteLanguage = async (req, res) => {
                 flag: "STOP",
                 message: response.message,
             });
-            res.status(dataLanguageDeleted.statusCode).json(response);
+            res.status(dataMerkDeleted.statusCode).json(response);
         } catch (error) {
             logger.loggerData({
                 timeStart: log.TimeStamp,
@@ -316,4 +312,3 @@ exports.deleteLanguage = async (req, res) => {
         res.status(400).json(response400);
     }
 };
-

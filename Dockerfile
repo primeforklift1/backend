@@ -15,8 +15,8 @@ COPY . .
 
 RUN chmod -R 777 /usr/src/app/uploads
 
-# Expose port 3000
-EXPOSE 3000
+# Expose port 5000
+EXPOSE 5000
 
 # Command untuk menjalankan aplikasi ketika container dijalankan
 CMD ["node", "server.js"]

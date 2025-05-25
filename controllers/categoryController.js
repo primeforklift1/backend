@@ -5,24 +5,25 @@ require("dotenv").config();
 const logger = require("../config/logger");
 
 const {
-  menu,
-  byMenu,
-  byMenuWhere,
-  addMenu,
-  updateMenu,
-  deleteMenu,
-} = require("../models/modelMenu");
+    category,
+    byCategory,
+    byCategoryWhere,
+    addCategory,
+    updateCategory,
+    deleteCategory,
+} = require("../models/modelCategory");
 
 const response500 = {
-  status: "Error",
-  message: "Internal Server Error!",
+    status: "Error",
+    message: "Internal Server Error!",
 };
 const response400 = {
-  status: "Error",
-  message: "Bad Request!",
+    status: "Error",
+    message: "Bad Request!",
 };
 
-exports.menu = async (req, res) => {
+
+exports.category = async (req, res) => {
     const log = logger.loggerData({ req });
 
     try {
@@ -30,15 +31,15 @@ exports.menu = async (req, res) => {
         const page = req.query.page;
         const rowCount = req.query.row_count;
 
-        const dataMenu = await menu(page, rowCount);
+        const dataCategory = await category(page, rowCount);
 
         const response = {
-            statusCode: dataMenu.statusCode,
-            status: dataMenu.status,
-            message: dataMenu.message,
+            statusCode: dataCategory.statusCode,
+            status: dataCategory.status,
+            message: dataCategory.message,
             transactioId: log.TransactionID,
-            totalData: dataMenu.totalData,
-            data: dataMenu.data,
+            totalData: dataCategory.totalData,
+            data: dataCategory.data,
         };
         logger.loggerData({
             timeStart: log.TimeStamp,
@@ -47,7 +48,7 @@ exports.menu = async (req, res) => {
             flag: "STOP",
             message: response.message,
         });
-        res.status(dataMenu.statusCode).json(response);
+        res.status(dataCategory.statusCode).json(response);
     } catch (error) {
         // console.log(error);
         logger.loggerData({
@@ -62,20 +63,20 @@ exports.menu = async (req, res) => {
     }
 };
 
-// menu by id
-exports.byMenu = async (req, res) => {
+// category by id
+exports.byCategory = async (req, res) => {
     const log = logger.loggerData({ req });
     const id = req.params.id;
     if (id) {
         try {
-            const dataMenu = await byMenu(id);
+            const dataCategory = await byCategory(id);
 
             const response = {
-                statusCode: dataMenu.statusCode,
-                status: dataMenu.status,
-                message: dataMenu.message,
+                statusCode: dataCategory.statusCode,
+                status: dataCategory.status,
+                message: dataCategory.message,
                 transactionId: log.TransactionID,
-                data: dataMenu.data,
+                data: dataCategory.data,
             };
             logger.loggerData({
                 timeStart: log.TimeStamp,
@@ -84,7 +85,7 @@ exports.byMenu = async (req, res) => {
                 flag: "STOP",
                 message: response.message,
             });
-            res.status(dataMenu.statusCode).json(response);
+            res.status(dataCategory.statusCode).json(response);
         } catch (error) {
             logger.loggerData({
                 timeStart: log.TimeStamp,
@@ -108,17 +109,16 @@ exports.byMenu = async (req, res) => {
         res.status(400).json(response400);
     }
 };
-// Menu by where
-exports.byMenuWhere = async (req, res) => {
+// Category by where
+exports.byCategoryWhere = async (req, res) => {
     const log = logger.loggerData({ req });
-    const { id, lang, status } = req.body;
+    const { id,lang, status } = req.body;
     // Ambil parameter page dan row_count dari query string
     const page = req.query.page;
     const rowCount = req.query.row_count;
     try {
       let whereClause = {};
-    //   whereClause.lang = 'id';
-      // Cek jika parameter id
+      // Cek jika parameter id_pengguna
       if (id) {
         whereClause.id = id;
       }
@@ -126,48 +126,19 @@ exports.byMenuWhere = async (req, res) => {
       if (lang) {
         whereClause.lang = lang;
       }
-      // Cek jika parameter status_aktif
+  
       if (status) {
         whereClause.status = status;
       }
-      const databyMenuWhere = await byMenuWhere(whereClause, page, rowCount);
-
-      let parent = [];
-      let child = [];
-      for(let i=0;i<databyMenuWhere.data.length;i++){
-        if(databyMenuWhere.data[i].parent == null){
-            parent.push(databyMenuWhere.data[i]);
-        }else{
-            child.push(databyMenuWhere.data[i]);
-        }
-      }
-
-      parent.sort((a, b) => a.order - b.order);
-      child.sort((a, b) => a.order - b.order);
-
-      let menuStructure = [];
-
-      for(let j=0;j<parent.length;j++){
-        let appendChild = [];
-        for(let k=0;k<child.length;k++){
-            if(parent[j].id == child[k].parent){
-                appendChild.push(child[k]);
-            }
-        }
-        menuStructure[j] = {
-            ...parent[j].toJSON(),
-            child : appendChild
-        }
-
-      }
+      const databyCategoryWhere = await byCategoryWhere(whereClause, page, rowCount);
   
       const response = {
-        statusCode: databyMenuWhere.statusCode,
-        status: databyMenuWhere.status,
-        message: databyMenuWhere.message,
+        statusCode: databyCategoryWhere.statusCode,
+        status: databyCategoryWhere.status,
+        message: databyCategoryWhere.message,
         transactionId: log.TransactionID,
-        totalData: databyMenuWhere.totalData,
-        data: menuStructure,
+        totalData: databyCategoryWhere.totalData,
+        data: databyCategoryWhere.data,
       };
       logger.loggerData({
         timeStart: log.TimeStamp,
@@ -176,7 +147,7 @@ exports.byMenuWhere = async (req, res) => {
         flag: "STOP",
         message: response.message,
       });
-      res.status(databyMenuWhere.statusCode).json(response);
+      res.status(databyCategoryWhere.statusCode).json(response);
     } catch (error) {
       logger.loggerData({
         timeStart: log.TimeStamp,
@@ -190,60 +161,8 @@ exports.byMenuWhere = async (req, res) => {
     }
   };
 
-  // Menu by where
-  exports.byMenuWhereAll = async (req, res) => {
-      const log = logger.loggerData({ req });
-      const { id, lang, status } = req.body;
-      // Ambil parameter page dan row_count dari query string
-      const page = req.query.page;
-      const rowCount = req.query.row_count;
-      try {
-          let whereClause = {};
-          //   whereClause.lang = 'id';
-          // Cek jika parameter id
-          if (id) {
-              whereClause.id = id;
-          }
-          if (lang) {
-              whereClause.lang = lang;
-          }
-          // Cek jika parameter status_aktif
-          if (status) {
-              whereClause.status = status;
-          }
-          const databyMenuWhere = await byMenuWhere(whereClause, page, rowCount);
-  
-          const response = {
-              statusCode: databyMenuWhere.statusCode,
-              status: databyMenuWhere.status,
-              message: databyMenuWhere.message,
-              transactionId: log.TransactionID,
-              totalData: databyMenuWhere.totalData,
-              data: databyMenuWhere.data,
-          };
-          logger.loggerData({
-              timeStart: log.TimeStamp,
-              req,
-              result: response,
-              flag: "STOP",
-              message: response.message,
-          });
-          res.status(databyMenuWhere.statusCode).json(response);
-      } catch (error) {
-          logger.loggerData({
-              timeStart: log.TimeStamp,
-              req,
-              result: response500,
-              flag: "ERROR",
-              message: error.message,
-          });
-          response500.transactioId = log.TransactionID;
-          res.status(500).json(response500);
-      }
-  };
-
-// add Menu
-exports.addMenu = async (req, res) => {
+// add Category
+exports.addCategory = async (req, res) => {
     const log = logger.loggerData({ req });
     const token = req.headers["authorization"];
     const validToken = token.split(" ");
@@ -254,34 +173,28 @@ exports.addMenu = async (req, res) => {
 
     const {
         lang,
-        parent,
-        order,
-        menu_type,
-        menu_name,
-        link,
+        parent_id,
+        name,
         status,
     } = req.body;
     try {
-        const dataMenu = {
+        const dataCategory = {
             lang: lang,
-            parent: parent,
-            order: order,
-            menu_type: menu_type,
-            menu_name: menu_name,
-            link: link,
+            parent_id: parent_id,
+            name: name,
             status: status,
             insert_date: new Date(),
             insert_by: userLogin
         };
-        // console.log(dataMenu);
-        const dataMenuAdded = await addMenu(dataMenu);
+        // console.log(dataCategory);
+        const dataCategoryAdded = await addCategory(dataCategory);
 
         const response = {
-            statusCode: dataMenuAdded.statusCode,
-            status: dataMenuAdded.status,
-            message: dataMenuAdded.message,
+            statusCode: dataCategoryAdded.statusCode,
+            status: dataCategoryAdded.status,
+            message: dataCategoryAdded.message,
             transactioId: log.TransactionID,
-            data: dataMenuAdded.data,
+            data: dataCategoryAdded.data,
         };
 
         logger.loggerData({
@@ -291,7 +204,7 @@ exports.addMenu = async (req, res) => {
             flag: "STOP",
             message: response.message,
         });
-        res.status(dataMenuAdded.statusCode).json(response);
+        res.status(dataCategoryAdded.statusCode).json(response);
     } catch (error) {
         logger.loggerData({
             timeStart: log.TimeStamp,
@@ -304,8 +217,8 @@ exports.addMenu = async (req, res) => {
         res.status(500).json(response500);
     }
 };
-// update Menu
-exports.updateMenu = async (req, res) => {
+// update Category
+exports.updateCategory = async (req, res) => {
     const log = logger.loggerData({ req });
     const token = req.headers["authorization"];
     const validToken = token.split(" ");
@@ -317,32 +230,26 @@ exports.updateMenu = async (req, res) => {
     const {
         id,
         lang,
-        parent,
-        order,
-        menu_type,
-        menu_name,
-        link,
+        parent_id,
+        name,
         status,
     } = req.body;
     try {
-        const dataMenu = {
-          lang: lang,
-          parent: parent,
-          order: order,
-          menu_type: menu_type,
-          menu_name: menu_name,
-          link: link,
-          status: status,
+        const dataCategory = {
+            lang: lang,
+            parent_id: parent_id,
+            name: name,
+            status: status,
         };
-        // console.log(dataMenu);
-        const dataMenuUpdated = await updateMenu(id, dataMenu);
+        // console.log(dataCategory);
+        const dataCategoryUpdated = await updateCategory(id, dataCategory);
 
         const response = {
-            statusCode: dataMenuUpdated.statusCode,
-            status: dataMenuUpdated.status,
-            message: dataMenuUpdated.message,
+            statusCode: dataCategoryUpdated.statusCode,
+            status: dataCategoryUpdated.status,
+            message: dataCategoryUpdated.message,
             transactioId: log.TransactionID,
-            data: dataMenuUpdated.data,
+            data: dataCategoryUpdated.data,
         };
 
         logger.loggerData({
@@ -352,7 +259,7 @@ exports.updateMenu = async (req, res) => {
             flag: "STOP",
             message: response.message,
         });
-        res.status(dataMenuUpdated.statusCode).json(response);
+        res.status(dataCategoryUpdated.statusCode).json(response);
     } catch (error) {
         logger.loggerData({
             timeStart: log.TimeStamp,
@@ -366,20 +273,20 @@ exports.updateMenu = async (req, res) => {
     }
 };
 
-//delete Menu by id Menu
-exports.deleteMenu = async (req, res) => {
+//delete Category by id Category
+exports.deleteCategory = async (req, res) => {
     const log = logger.loggerData({ req });
     const id = req.params.id;
     if (id) {
         try {
-            const dataMenuDeleted = await deleteMenu(id);
+            const dataCategoryDeleted = await deleteCategory(id);
 
             const response = {
-                statusCode: dataMenuDeleted.statusCode,
-                status: dataMenuDeleted.status,
-                message: dataMenuDeleted.message,
+                statusCode: dataCategoryDeleted.statusCode,
+                status: dataCategoryDeleted.status,
+                message: dataCategoryDeleted.message,
                 transactioId: log.TransactionID,
-                data: dataMenuDeleted.data,
+                data: dataCategoryDeleted.data,
             };
 
             logger.loggerData({
@@ -389,7 +296,7 @@ exports.deleteMenu = async (req, res) => {
                 flag: "STOP",
                 message: response.message,
             });
-            res.status(dataMenuDeleted.statusCode).json(response);
+            res.status(dataCategoryDeleted.statusCode).json(response);
         } catch (error) {
             logger.loggerData({
                 timeStart: log.TimeStamp,

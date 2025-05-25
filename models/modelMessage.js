@@ -1,44 +1,61 @@
 const { sequelizePrime } = require("../config/db");
 const { Sequelize, DataTypes } = require("sequelize");
 
-const Client = sequelizePrime.define(
-  "Client",
+const Message = sequelizePrime.define(
+  "Message",
   {
     id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    lang: {
-      type: Sequelize.STRING(50),
-      allowNull: true
-    },
-    name: {
-      type: DataTypes.STRING(50),
-      allowNull: true,
-    },
-    image: {
-      type: DataTypes.STRING(50),
-      allowNull: true,
-    },
-    link: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    status: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 1,
-    },
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        primaryKey: true,
+        autoIncrement: true
+      },
+      lang: {
+        type: Sequelize.STRING(50),
+        allowNull: true
+      },
+      country: {
+        type: Sequelize.STRING(50),
+        allowNull: true
+      },
+      name: {
+        type: Sequelize.STRING(50),
+        allowNull: true
+      },
+      email: {
+        type: Sequelize.STRING(50),
+        allowNull: true
+      },
+      telp: {
+          type: Sequelize.STRING(50),
+          allowNull: true,
+          defaultValue: 0
+      },
+      address: {
+        type: Sequelize.TEXT,
+        allowNull: true
+      },
+      message: {
+        type: Sequelize.TEXT,
+        allowNull: true
+      },
+      status: {
+        type: Sequelize.TINYINT(1),
+        allowNull: true,
+        defaultValue: 1
+      },
+      insert_date: {
+        type: Sequelize.DATE,
+        allowNull: true
+      }
   },
   {
-    tableName: "clients",
+    tableName: "message",
     timestamps: false,
   }
 );
 
-async function client(page, rowCount) {
+async function message(page, rowCount) {
   try {
     // Inisialisasi pagination
     let limit = null; // Tanpa batas limit
@@ -50,19 +67,19 @@ async function client(page, rowCount) {
       offset = (page - 1) * limit; // Menghitung offset
     }
 
-    const allClients = await Client.findAll({
+    const allMessages = await Message.findAll({
       limit: limit, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
       offset: offset, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
     });
-    const totalRow = await Client.count();
+    const totalRow = await Message.count();
 
-    if (allClients != null) {
+    if (allMessages != null) {
       return {
         statusCode: 200,
         status: "Success",
         message: "Data Berhasil Ditemukan!",
         totalData: totalRow,
-        data: allClients,
+        data: allMessages,
       };
     } else {
       return {
@@ -75,27 +92,27 @@ async function client(page, rowCount) {
     console.error(error);
     return {
       status: "Error",
-      message: "Terjadi Kesalahan Saat Menampilkan Data Client!",
+      message: "Terjadi Kesalahan Saat Menampilkan Data Message!",
       data: error.message,
     };
   }
 }
 
-// Fungsi untuk menampilkan Client By id
-async function byClient(id) {
+// Fungsi untuk menampilkan Message By id
+async function byMessage(id) {
   try {
-    const clientRaw = await Client.findOne({
+    const messageRaw = await Message.findOne({
       where: {
         id: id,
       },
     });
 
-    if (clientRaw != null) {
+    if (messageRaw != null) {
       return {
         statusCode: 200,
         status: "Success",
         message: "Data Berhasil Ditemukan!",
-        data: clientRaw,
+        data: messageRaw,
       };
     } else {
       return {
@@ -108,13 +125,13 @@ async function byClient(id) {
     console.error(error);
     return {
       status: "Error",
-      message: "Terjadi Kesalahan Saat Menampilkan Data Client!",
+      message: "Terjadi Kesalahan Saat Menampilkan Data Message!",
       data: error.message,
     };
   }
 }
-// Fungsi untuk menampilkan Client By where
-async function byClientWhere(whereClause, page, rowCount) {
+// Fungsi untuk menampilkan Message By where
+async function byMessageWhere(whereClause, page, rowCount) {
   try {
     // Inisialisasi pagination
     let limit = null; // Tanpa batas limit
@@ -125,19 +142,19 @@ async function byClientWhere(whereClause, page, rowCount) {
       limit = parseInt(rowCount);
       offset = (page - 1) * limit; // Menghitung offset
     }
-    const totalData = await Client.findAll({ where: whereClause });
-    const ClientData = await Client.findAll({
+    const totalData = await Message.findAll({ where: whereClause });
+    const MessageData = await Message.findAll({
       where: whereClause,
       limit: limit, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
       offset: offset, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
     });
-    if (ClientData.length > 0) {
+    if (MessageData.length > 0) {
       return {
         statusCode: 200,
         status: "Success",
         message: "Data Berhasil Ditemukan!",
         totalData: totalData.length,
-        data: ClientData,
+        data: MessageData,
       };
     } else {
       return {
@@ -150,29 +167,28 @@ async function byClientWhere(whereClause, page, rowCount) {
     console.error(error);
     return {
       status: "Error",
-      message: "Terjadi Kesalahan Saat Menampilkan Data Client!",
+      message: "Terjadi Kesalahan Saat Menampilkan Data Message!",
       data: error.message,
     };
   }
 }
-
-async function addClient(dataClient) {
+async function addMessage(dataMessage) {
   try {
-    // Gunakan metode create untuk menambah data ke dalam tabel Client
-    const newClient = await Client.create(dataClient);
+    // Gunakan metode create untuk menambah data ke dalam tabel Message
+    const newMessage = await Message.create(dataMessage);
 
-    if (newClient) {
+    if (newMessage) {
       return {
         statusCode: 201,
         status: "Success",
-        message: "Client berhasil ditambahkan!",
-        data: newClient,
+        message: "Message berhasil ditambahkan!",
+        data: newMessage,
       };
     } else {
       return {
         statusCode: 400,
         status: "Bad Request",
-        message: "Gagal menambahkan Client.",
+        message: "Gagal menambahkan Message.",
       };
     }
   } catch (error) {
@@ -180,39 +196,39 @@ async function addClient(dataClient) {
     return {
       statusCode: 500,
       status: "Error",
-      message: "Terjadi kesalahan saat menambahkan Client.",
+      message: "Terjadi kesalahan saat menambahkan Message.",
       data: error.message,
     };
   }
 }
-// Fungsi untuk mengubah Client
-async function updateClient(id, dataClient) {
+// Fungsi untuk mengubah Message
+async function updateMessage(id, dataMessage) {
   try {
-    // Cek apakah Client dengan id yang diberikan ada dalam database
-    const existingDataClient = await Client.findByPk(id);
-    if (!existingDataClient) {
+    // Cek apakah Message dengan id yang diberikan ada dalam database
+    const existingDataMessage = await Message.findByPk(id);
+    if (!existingDataMessage) {
       return {
         statusCode: 404,
         status: "Not Found",
-        message: "Data Client tidak ditemukan.",
+        message: "Data Message tidak ditemukan.",
       };
     }
 
-    // Gunakan metode create untuk mengubah data ke dalam tabel Client
-    const updatedClient = await existingDataClient.update(dataClient);
+    // Gunakan metode create untuk mengubah data ke dalam tabel Message
+    const updatedMessage = await existingDataMessage.update(dataMessage);
 
-    if (updatedClient) {
+    if (updatedMessage) {
       return {
         statusCode: 200,
         status: "Success",
-        message: "Client berhasil diperbaharui!",
-        data: updatedClient,
+        message: "Message berhasil diperbaharui!",
+        data: updatedMessage,
       };
     } else {
       return {
         statusCode: 400,
         status: "Bad Request",
-        message: "Gagal memperbaharui Client.",
+        message: "Gagal memperbaharui Message.",
       };
     }
   } catch (error) {
@@ -220,32 +236,32 @@ async function updateClient(id, dataClient) {
     return {
       statusCode: 500,
       status: "Error",
-      message: "Terjadi kesalahan saat memperbaharui Client.",
+      message: "Terjadi kesalahan saat memperbaharui Message.",
       data: error.message,
     };
   }
 }
 
-// Fungsi untuk menghapus Client
-async function deleteClient(id) {
+// Fungsi untuk menghapus Message
+async function deleteMessage(id) {
   try {
-    // Cek apakah Client dengan id yang diberikan ada dalam database
-    const existingClient = await Client.findByPk(id);
-    if (!existingClient) {
+    // Cek apakah Message dengan id yang diberikan ada dalam database
+    const existingMessage = await Message.findByPk(id);
+    if (!existingMessage) {
       return {
         statusCode: 404,
         status: "Not Found",
-        message: "Data Client tidak ditemukan.",
+        message: "Data Message tidak ditemukan.",
       };
     }
 
-    // Gunakan metode destroy untuk menghapus data dari tabel Client
-    await existingClient.destroy();
+    // Gunakan metode destroy untuk menghapus data dari tabel Message
+    await existingMessage.destroy();
 
     return {
       statusCode: 200,
       status: "Success",
-      message: "Client berhasil dihapus!",
+      message: "Message berhasil dihapus!",
     };
   } catch (error) {
     console.error(error);
@@ -259,10 +275,10 @@ async function deleteClient(id) {
 }
 
 module.exports = {
-  client,
-  byClient,
-  byClientWhere,
-  addClient,
-  updateClient,
-  deleteClient,
+  message,
+  byMessage,
+  byMessageWhere,
+  addMessage,
+  updateMessage,
+  deleteMessage,
 };

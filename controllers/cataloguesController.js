@@ -5,13 +5,16 @@ require("dotenv").config();
 const logger = require("../config/logger");
 
 const {
-  config,
-  byConfig,
-  byConfigWhere,
-  addConfig,
-  updateConfig,
-  deleteConfig,
-} = require("../models/modelConfig");
+  addCatalogues,
+  updateCatalogues,
+  deleteCatalogues,
+} = require("../models/modelCatalogue");
+const {
+  catalogues,
+  byCatalogues,
+  byCataloguesWhere
+} = require("../models/modelCataloguesView");
+const { type } = require("os");
 
 const response500 = {
   status: "Error",
@@ -22,7 +25,7 @@ const response400 = {
   message: "Bad Request!",
 };
 
-exports.config = async (req, res) => {
+exports.catalogues = async (req, res) => {
   const log = logger.loggerData({ req });
 
   try {
@@ -30,15 +33,15 @@ exports.config = async (req, res) => {
     const page = req.query.page;
     const rowCount = req.query.row_count;
 
-    const dataConfig = await config(page, rowCount);
+    const dataCatalogues = await catalogues(page, rowCount);
 
     const response = {
-      statusCode: dataConfig.statusCode,
-      status: dataConfig.status,
-      message: dataConfig.message,
+      statusCode: dataCatalogues.statusCode,
+      status: dataCatalogues.status,
+      message: dataCatalogues.message,
       transactioId: log.TransactionID,
-      totalData: dataConfig.totalData,
-      data: dataConfig.data,
+      totalData: dataCatalogues.totalData,
+      data: dataCatalogues.data,
     };
     logger.loggerData({
       timeStart: log.TimeStamp,
@@ -47,7 +50,7 @@ exports.config = async (req, res) => {
       flag: "STOP",
       message: response.message,
     });
-    res.status(dataConfig.statusCode).json(response);
+    res.status(dataCatalogues.statusCode).json(response);
   } catch (error) {
     // console.log(error);
     logger.loggerData({
@@ -62,20 +65,20 @@ exports.config = async (req, res) => {
   }
 };
 
-// config by id
-exports.byConfig = async (req, res) => {
+// catalogues by id
+exports.byCatalogues = async (req, res) => {
   const log = logger.loggerData({ req });
   const id = req.params.id;
   if (id) {
     try {
-      const dataConfig = await byConfig(id);
+      const dataCatalogues = await byCatalogues(id);
 
       const response = {
-        statusCode: dataConfig.statusCode,
-        status: dataConfig.status,
-        message: dataConfig.message,
+        statusCode: dataCatalogues.statusCode,
+        status: dataCatalogues.status,
+        message: dataCatalogues.message,
         transactionId: log.TransactionID,
-        data: dataConfig.data,
+        data: dataCatalogues.data,
       };
       logger.loggerData({
         timeStart: log.TimeStamp,
@@ -84,7 +87,7 @@ exports.byConfig = async (req, res) => {
         flag: "STOP",
         message: response.message,
       });
-      res.status(dataConfig.statusCode).json(response);
+      res.status(dataCatalogues.statusCode).json(response);
     } catch (error) {
       logger.loggerData({
         timeStart: log.TimeStamp,
@@ -108,40 +111,44 @@ exports.byConfig = async (req, res) => {
     res.status(400).json(response400);
   }
 };
-// config by where
-exports.byConfigWhere = async (req, res) => {
+// catalogues by where
+exports.byCataloguesWhere = async (req, res) => {
   const log = logger.loggerData({ req });
-  const { config_id,lang,config_type, status } = req.body;
+  const { id,lang,id_merek,id_category, status } = req.body;
   // Ambil parameter page dan row_count dari query string
   const page = req.query.page;
   const rowCount = req.query.row_count;
   try {
     let whereClause = {};
     // Cek jika parameter id_pengguna
-    if (config_id) {
-      whereClause.config_id = config_id;
+    if (id) {
+      whereClause.id = id;
     }
 
     // Cek jika parameter lang
     if (lang) {
       whereClause.lang = lang;
     }
-    // Cek jika parameter config_type
-    if (config_type) {
-      whereClause.config_type = config_type;
+    // Cek jika parameter id_merek
+    if (id_merek) {
+      whereClause.id_merek = id_merek;
+    }
+    // Cek jika parameter id_category
+    if (id_category) {
+      whereClause.id_category = id_category;
     }
     if (status) {
       whereClause.status = status;
     }
-    const databyConfigWhere = await byConfigWhere(whereClause, page, rowCount);
+    const databyCataloguesWhere = await byCataloguesWhere(whereClause, page, rowCount);
 
     const response = {
-      statusCode: databyConfigWhere.statusCode,
-      status: databyConfigWhere.status,
-      message: databyConfigWhere.message,
+      statusCode: databyCataloguesWhere.statusCode,
+      status: databyCataloguesWhere.status,
+      message: databyCataloguesWhere.message,
       transactionId: log.TransactionID,
-      totalData: databyConfigWhere.totalData,
-      data: databyConfigWhere.data,
+      totalData: databyCataloguesWhere.totalData,
+      data: databyCataloguesWhere.data,
     };
     logger.loggerData({
       timeStart: log.TimeStamp,
@@ -150,7 +157,7 @@ exports.byConfigWhere = async (req, res) => {
       flag: "STOP",
       message: response.message,
     });
-    res.status(databyConfigWhere.statusCode).json(response);
+    res.status(databyCataloguesWhere.statusCode).json(response);
   } catch (error) {
     logger.loggerData({
       timeStart: log.TimeStamp,
@@ -164,8 +171,8 @@ exports.byConfigWhere = async (req, res) => {
   }
 };
 
-// add Config
-exports.addConfig = async (req, res) => {
+// add Catalogues
+exports.addCatalogues = async (req, res) => {
   const log = logger.loggerData({ req });
   const token = req.headers["authorization"];
   const validToken = token.split(" ");
@@ -176,36 +183,38 @@ exports.addConfig = async (req, res) => {
 
   const {
     lang,
-    config_name,
-    config_value,
-    config_type,
-    order,
+    slug,
+    name,
+    id_merk,
+    description,
+    spec,
     image,
-    icon_class,
+    id_category,
     status,
   } = req.body;
   try {
-    const dataConfig = {
+    const dataCatalogues = {
       lang:lang,
-      config_name: config_name,
-      config_value: config_value,
-      config_type: config_type,
-      order: order,
+      slug: slug,
+      name: name,
+      id_merk: id_merk,
+      description: description,
+      spec: spec,
       image: image,
-      icon_class: icon_class,
+      id_category: id_category,
       status: status,
       insert_date: new Date(),
       insert_by: userLogin
     };
-    // console.log(dataConfig);
-    const dataConfigAdded = await addConfig(dataConfig);
+    // console.log(dataCatalogues);
+    const dataCataloguesAdded = await addCatalogues(dataCatalogues);
 
     const response = {
-      statusCode: dataConfigAdded.statusCode,
-      status: dataConfigAdded.status,
-      message: dataConfigAdded.message,
+      statusCode: dataCataloguesAdded.statusCode,
+      status: dataCataloguesAdded.status,
+      message: dataCataloguesAdded.message,
       transactioId: log.TransactionID,
-      data: dataConfigAdded.data,
+      data: dataCataloguesAdded.data,
     };
 
     logger.loggerData({
@@ -215,7 +224,7 @@ exports.addConfig = async (req, res) => {
       flag: "STOP",
       message: response.message,
     });
-    res.status(dataConfigAdded.statusCode).json(response);
+    res.status(dataCataloguesAdded.statusCode).json(response);
   } catch (error) {
     logger.loggerData({
       timeStart: log.TimeStamp,
@@ -228,8 +237,8 @@ exports.addConfig = async (req, res) => {
     res.status(500).json(response500);
   }
 };
-// update Config
-exports.updateConfig = async (req, res) => {
+// update Catalogues
+exports.updateCatalogues = async (req, res) => {
   const log = logger.loggerData({ req });
   const token = req.headers["authorization"];
   const validToken = token.split(" ");
@@ -241,34 +250,36 @@ exports.updateConfig = async (req, res) => {
   const {
     id,
     lang,
-    config_name,
-    config_value,
-    config_type,
-    order,
+    slug,
+    name,
+    id_merek,
+    description,
+    spec,
     image,
-    icon_class,
-    status
+    id_category,
+    status,
   } = req.body;
   try {
-    const dataConfig = {
+    const dataCatalogues = {
         lang:lang,
-        config_name: config_name,
-        config_value: config_value,
-        config_type: config_type,
-        order: order,
+        slug: slug,
+        name: name,
+        id_merek: id_merek,
+        description: description,
+        spec: spec,
         image: image,
-        icon_class: icon_class,
+        id_category: id_category,
         status: status,
     };
-    // console.log(dataConfig);
-    const dataConfigUpdated = await updateConfig(id, dataConfig);
+    // console.log(dataCatalogues);
+    const dataCataloguesUpdated = await updateCatalogues(id, dataCatalogues);
 
     const response = {
-      statusCode: dataConfigUpdated.statusCode,
-      status: dataConfigUpdated.status,
-      message: dataConfigUpdated.message,
+      statusCode: dataCataloguesUpdated.statusCode,
+      status: dataCataloguesUpdated.status,
+      message: dataCataloguesUpdated.message,
       transactioId: log.TransactionID,
-      data: dataConfigUpdated.data,
+      data: dataCataloguesUpdated.data,
     };
 
     logger.loggerData({
@@ -278,7 +289,7 @@ exports.updateConfig = async (req, res) => {
       flag: "STOP",
       message: response.message,
     });
-    res.status(dataConfigUpdated.statusCode).json(response);
+    res.status(dataCataloguesUpdated.statusCode).json(response);
   } catch (error) {
     logger.loggerData({
       timeStart: log.TimeStamp,
@@ -292,20 +303,20 @@ exports.updateConfig = async (req, res) => {
   }
 };
 
-//delete Config by id Config
-exports.deleteConfig = async (req, res) => {
+//delete Catalogues by id Catalogues
+exports.deleteCatalogues = async (req, res) => {
   const log = logger.loggerData({ req });
   const id = req.params.id;
   if (id) {
     try {
-      const dataConfigDeleted = await deleteConfig(id);
+      const dataCataloguesDeleted = await deleteCatalogues(id);
 
       const response = {
-        statusCode: dataConfigDeleted.statusCode,
-        status: dataConfigDeleted.status,
-        message: dataConfigDeleted.message,
+        statusCode: dataCataloguesDeleted.statusCode,
+        status: dataCataloguesDeleted.status,
+        message: dataCataloguesDeleted.message,
         transactioId: log.TransactionID,
-        data: dataConfigDeleted.data,
+        data: dataCataloguesDeleted.data,
       };
 
       logger.loggerData({
@@ -315,7 +326,7 @@ exports.deleteConfig = async (req, res) => {
         flag: "STOP",
         message: response.message,
       });
-      res.status(dataConfigDeleted.statusCode).json(response);
+      res.status(dataCataloguesDeleted.statusCode).json(response);
     } catch (error) {
       logger.loggerData({
         timeStart: log.TimeStamp,

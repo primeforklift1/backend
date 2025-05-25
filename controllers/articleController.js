@@ -5,13 +5,15 @@ require("dotenv").config();
 const logger = require("../config/logger");
 
 const {
-  config,
-  byConfig,
-  byConfigWhere,
-  addConfig,
-  updateConfig,
-  deleteConfig,
-} = require("../models/modelConfig");
+  addArticle,
+  updateArticle,
+  deleteArticle,
+} = require("../models/modelArticle");
+const {
+  article,
+  byArticle,
+  byArticleWhere
+} = require("../models/modelArticleView");
 
 const response500 = {
   status: "Error",
@@ -22,7 +24,7 @@ const response400 = {
   message: "Bad Request!",
 };
 
-exports.config = async (req, res) => {
+exports.article = async (req, res) => {
   const log = logger.loggerData({ req });
 
   try {
@@ -30,15 +32,15 @@ exports.config = async (req, res) => {
     const page = req.query.page;
     const rowCount = req.query.row_count;
 
-    const dataConfig = await config(page, rowCount);
+    const dataArticle = await article(page, rowCount);
 
     const response = {
-      statusCode: dataConfig.statusCode,
-      status: dataConfig.status,
-      message: dataConfig.message,
+      statusCode: dataArticle.statusCode,
+      status: dataArticle.status,
+      message: dataArticle.message,
       transactioId: log.TransactionID,
-      totalData: dataConfig.totalData,
-      data: dataConfig.data,
+      totalData: dataArticle.totalData,
+      data: dataArticle.data,
     };
     logger.loggerData({
       timeStart: log.TimeStamp,
@@ -47,7 +49,7 @@ exports.config = async (req, res) => {
       flag: "STOP",
       message: response.message,
     });
-    res.status(dataConfig.statusCode).json(response);
+    res.status(dataArticle.statusCode).json(response);
   } catch (error) {
     // console.log(error);
     logger.loggerData({
@@ -62,20 +64,20 @@ exports.config = async (req, res) => {
   }
 };
 
-// config by id
-exports.byConfig = async (req, res) => {
+// article by id
+exports.byArticle = async (req, res) => {
   const log = logger.loggerData({ req });
   const id = req.params.id;
   if (id) {
     try {
-      const dataConfig = await byConfig(id);
+      const dataArticle = await byArticle(id);
 
       const response = {
-        statusCode: dataConfig.statusCode,
-        status: dataConfig.status,
-        message: dataConfig.message,
+        statusCode: dataArticle.statusCode,
+        status: dataArticle.status,
+        message: dataArticle.message,
         transactionId: log.TransactionID,
-        data: dataConfig.data,
+        data: dataArticle.data,
       };
       logger.loggerData({
         timeStart: log.TimeStamp,
@@ -84,7 +86,7 @@ exports.byConfig = async (req, res) => {
         flag: "STOP",
         message: response.message,
       });
-      res.status(dataConfig.statusCode).json(response);
+      res.status(dataArticle.statusCode).json(response);
     } catch (error) {
       logger.loggerData({
         timeStart: log.TimeStamp,
@@ -108,40 +110,36 @@ exports.byConfig = async (req, res) => {
     res.status(400).json(response400);
   }
 };
-// config by where
-exports.byConfigWhere = async (req, res) => {
+// article by where
+exports.byArticleWhere = async (req, res) => {
   const log = logger.loggerData({ req });
-  const { config_id,lang,config_type, status } = req.body;
+  const { id,lang, status } = req.body;
   // Ambil parameter page dan row_count dari query string
   const page = req.query.page;
   const rowCount = req.query.row_count;
   try {
     let whereClause = {};
     // Cek jika parameter id_pengguna
-    if (config_id) {
-      whereClause.config_id = config_id;
+    if (id) {
+      whereClause.id = id;
     }
 
     // Cek jika parameter lang
     if (lang) {
       whereClause.lang = lang;
     }
-    // Cek jika parameter config_type
-    if (config_type) {
-      whereClause.config_type = config_type;
-    }
     if (status) {
       whereClause.status = status;
     }
-    const databyConfigWhere = await byConfigWhere(whereClause, page, rowCount);
+    const databyArticleWhere = await byArticleWhere(whereClause, page, rowCount);
 
     const response = {
-      statusCode: databyConfigWhere.statusCode,
-      status: databyConfigWhere.status,
-      message: databyConfigWhere.message,
+      statusCode: databyArticleWhere.statusCode,
+      status: databyArticleWhere.status,
+      message: databyArticleWhere.message,
       transactionId: log.TransactionID,
-      totalData: databyConfigWhere.totalData,
-      data: databyConfigWhere.data,
+      totalData: databyArticleWhere.totalData,
+      data: databyArticleWhere.data,
     };
     logger.loggerData({
       timeStart: log.TimeStamp,
@@ -150,7 +148,7 @@ exports.byConfigWhere = async (req, res) => {
       flag: "STOP",
       message: response.message,
     });
-    res.status(databyConfigWhere.statusCode).json(response);
+    res.status(databyArticleWhere.statusCode).json(response);
   } catch (error) {
     logger.loggerData({
       timeStart: log.TimeStamp,
@@ -164,8 +162,8 @@ exports.byConfigWhere = async (req, res) => {
   }
 };
 
-// add Config
-exports.addConfig = async (req, res) => {
+// add Article
+exports.addArticle = async (req, res) => {
   const log = logger.loggerData({ req });
   const token = req.headers["authorization"];
   const validToken = token.split(" ");
@@ -176,36 +174,36 @@ exports.addConfig = async (req, res) => {
 
   const {
     lang,
-    config_name,
-    config_value,
-    config_type,
-    order,
+    slug,
+    title,
+    preface,
+    detail,
+    keyword,
     image,
-    icon_class,
     status,
   } = req.body;
   try {
-    const dataConfig = {
+    const dataArticle = {
       lang:lang,
-      config_name: config_name,
-      config_value: config_value,
-      config_type: config_type,
-      order: order,
+      slug: slug,
+      title: title,
+      preface: preface,
+      detail: detail,
+      keyword: keyword,
       image: image,
-      icon_class: icon_class,
       status: status,
       insert_date: new Date(),
       insert_by: userLogin
     };
-    // console.log(dataConfig);
-    const dataConfigAdded = await addConfig(dataConfig);
+    // console.log(dataArticle);
+    const dataArticleAdded = await addArticle(dataArticle);
 
     const response = {
-      statusCode: dataConfigAdded.statusCode,
-      status: dataConfigAdded.status,
-      message: dataConfigAdded.message,
+      statusCode: dataArticleAdded.statusCode,
+      status: dataArticleAdded.status,
+      message: dataArticleAdded.message,
       transactioId: log.TransactionID,
-      data: dataConfigAdded.data,
+      data: dataArticleAdded.data,
     };
 
     logger.loggerData({
@@ -215,7 +213,7 @@ exports.addConfig = async (req, res) => {
       flag: "STOP",
       message: response.message,
     });
-    res.status(dataConfigAdded.statusCode).json(response);
+    res.status(dataArticleAdded.statusCode).json(response);
   } catch (error) {
     logger.loggerData({
       timeStart: log.TimeStamp,
@@ -228,8 +226,8 @@ exports.addConfig = async (req, res) => {
     res.status(500).json(response500);
   }
 };
-// update Config
-exports.updateConfig = async (req, res) => {
+// update Article
+exports.updateArticle = async (req, res) => {
   const log = logger.loggerData({ req });
   const token = req.headers["authorization"];
   const validToken = token.split(" ");
@@ -241,34 +239,34 @@ exports.updateConfig = async (req, res) => {
   const {
     id,
     lang,
-    config_name,
-    config_value,
-    config_type,
-    order,
+    slug,
+    title,
+    preface,
+    detail,
+    keyword,
     image,
-    icon_class,
-    status
+    status,
   } = req.body;
   try {
-    const dataConfig = {
-        lang:lang,
-        config_name: config_name,
-        config_value: config_value,
-        config_type: config_type,
-        order: order,
-        image: image,
-        icon_class: icon_class,
-        status: status,
+    const dataArticle = {
+      lang:lang,
+      slug: slug,
+      title: title,
+      preface: preface,
+      detail: detail,
+      keyword: keyword,
+      image: image,
+      status: status,
     };
-    // console.log(dataConfig);
-    const dataConfigUpdated = await updateConfig(id, dataConfig);
+    // console.log(dataArticle);
+    const dataArticleUpdated = await updateArticle(id, dataArticle);
 
     const response = {
-      statusCode: dataConfigUpdated.statusCode,
-      status: dataConfigUpdated.status,
-      message: dataConfigUpdated.message,
+      statusCode: dataArticleUpdated.statusCode,
+      status: dataArticleUpdated.status,
+      message: dataArticleUpdated.message,
       transactioId: log.TransactionID,
-      data: dataConfigUpdated.data,
+      data: dataArticleUpdated.data,
     };
 
     logger.loggerData({
@@ -278,7 +276,7 @@ exports.updateConfig = async (req, res) => {
       flag: "STOP",
       message: response.message,
     });
-    res.status(dataConfigUpdated.statusCode).json(response);
+    res.status(dataArticleUpdated.statusCode).json(response);
   } catch (error) {
     logger.loggerData({
       timeStart: log.TimeStamp,
@@ -292,20 +290,20 @@ exports.updateConfig = async (req, res) => {
   }
 };
 
-//delete Config by id Config
-exports.deleteConfig = async (req, res) => {
+//delete Article by id Article
+exports.deleteArticle = async (req, res) => {
   const log = logger.loggerData({ req });
   const id = req.params.id;
   if (id) {
     try {
-      const dataConfigDeleted = await deleteConfig(id);
+      const dataArticleDeleted = await deleteArticle(id);
 
       const response = {
-        statusCode: dataConfigDeleted.statusCode,
-        status: dataConfigDeleted.status,
-        message: dataConfigDeleted.message,
+        statusCode: dataArticleDeleted.statusCode,
+        status: dataArticleDeleted.status,
+        message: dataArticleDeleted.message,
         transactioId: log.TransactionID,
-        data: dataConfigDeleted.data,
+        data: dataArticleDeleted.data,
       };
 
       logger.loggerData({
@@ -315,7 +313,7 @@ exports.deleteConfig = async (req, res) => {
         flag: "STOP",
         message: response.message,
       });
-      res.status(dataConfigDeleted.statusCode).json(response);
+      res.status(dataArticleDeleted.statusCode).json(response);
     } catch (error) {
       logger.loggerData({
         timeStart: log.TimeStamp,

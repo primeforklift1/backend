@@ -4,6 +4,7 @@ module.exports = {
       CREATE VIEW article_view AS
       SELECT 
         IF(article.slug IS NULL OR article.slug = '', article.id, article.slug) AS id,
+        article.lang AS lang,
         article.slug AS slug,
         article.title AS title,
         article.preface AS preface,

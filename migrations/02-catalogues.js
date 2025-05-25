@@ -27,12 +27,16 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: true
       },
+      spec: {
+        type: Sequelize.TEXT,
+        allowNull: true
+      },
       image: {
         type: Sequelize.TEXT,
         allowNull: true
       },
-      type: {
-        type: Sequelize.ENUM('unit', 'part', 'ban', 'battery', 'attachment'),
+      id_category: {
+        type: Sequelize.INTEGER,
         allowNull: true
       },
       status: {
