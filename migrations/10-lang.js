@@ -23,7 +23,11 @@ module.exports = {
         type: Sequelize.TINYINT,
         allowNull: false,
         defaultValue: 1
-      }
+      },
+      translate_id: {
+        type: Sequelize.STRING(50),
+        allowNull: true
+      },
     });
   },
 
