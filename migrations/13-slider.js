@@ -7,12 +7,16 @@ module.exports = {
         primaryKey: true,
         autoIncrement: true
       },
-      title: {
+      lang: {
         type: Sequelize.STRING(50),
         allowNull: true
       },
+      title: {
+        type: Sequelize.STRING(255),
+        allowNull: true
+      },
       image: {
-        type: Sequelize.STRING(50),
+        type: Sequelize.STRING(255),
         allowNull: true
       },
       text: {

@@ -10,6 +10,10 @@ const ChatMain = sequelizePrime.define(
       primaryKey: true,
       autoIncrement: true,
     },
+    lang: {
+      type: Sequelize.STRING(50),
+      allowNull: true
+    },
     name: {
       type: DataTypes.STRING(50),
       allowNull: true,

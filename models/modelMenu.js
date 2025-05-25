@@ -1,65 +1,61 @@
 const { sequelizePrime } = require("../config/db");
 const { Sequelize, DataTypes } = require("sequelize");
 
-const Service = sequelizePrime.define(
-  "Service",
+const Menu = sequelizePrime.define(
+  "Menu",
   {
     id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    lang: {
-      type: Sequelize.STRING(50),
-      allowNull: true
-    },
-    title_name: {
-      type: Sequelize.STRING(255),
-      allowNull: true
-    },
-    group: {
-      type: Sequelize.STRING(255),
-      allowNull: true
-    },
-    name: {
-      type: DataTypes.STRING(100),
-      allowNull: true,
-    },
-    preface: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
-    },
-    detail: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    image: {
-      type: DataTypes.STRING(50),
-      allowNull: true,
-    },
-    status: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 1
-    },
-    insert_date: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    update_date: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      lang: {
+        type: Sequelize.STRING(50),
+        allowNull: true
+      },
+      parent: {
+        type: Sequelize.STRING(50),
+        allowNull: true
+      },
+      order: {
+        type: Sequelize.STRING(50),
+        allowNull: true
+      },
+      menu_type: {
+          type: Sequelize.TINYINT(1),
+          allowNull: true,
+          defaultValue: 0
+      },
+      menu_name: {
+        type: Sequelize.STRING(50),
+        allowNull: true
+      },
+      link: {
+        type: Sequelize.STRING(255),
+        allowNull: true
+      },
+      status: {
+        type: Sequelize.TINYINT(1),
+        allowNull: true,
+        defaultValue: 1
+      },
+      insert_date: {
+        type: Sequelize.DATE,
+        allowNull: true
+      },
+      insert_by: {
+        type: Sequelize.STRING(20),
+        allowNull: true
+      }
   },
   {
-    tableName: "services",
+    tableName: "menu",
     timestamps: false,
   }
 );
 
-
-async function service(page, rowCount) {
+async function menu(page, rowCount) {
   try {
     // Inisialisasi pagination
     let limit = null; // Tanpa batas limit
@@ -71,19 +67,19 @@ async function service(page, rowCount) {
       offset = (page - 1) * limit; // Menghitung offset
     }
 
-    const allServices = await Service.findAll({
+    const allMenus = await Menu.findAll({
       limit: limit, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
       offset: offset, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
     });
-    const totalRow = await Service.count();
+    const totalRow = await Menu.count();
 
-    if (allServices != null) {
+    if (allMenus != null) {
       return {
         statusCode: 200,
         status: "Success",
         message: "Data Berhasil Ditemukan!",
         totalData: totalRow,
-        data: allServices,
+        data: allMenus,
       };
     } else {
       return {
@@ -96,27 +92,27 @@ async function service(page, rowCount) {
     console.error(error);
     return {
       status: "Error",
-      message: "Terjadi Kesalahan Saat Menampilkan Data Service!",
+      message: "Terjadi Kesalahan Saat Menampilkan Data Menu!",
       data: error.message,
     };
   }
 }
 
-// Fungsi untuk menampilkan Service By id
-async function byService(id) {
+// Fungsi untuk menampilkan Menu By id
+async function byMenu(id) {
   try {
-    const serviceRaw = await Service.findOne({
+    const menuRaw = await Menu.findOne({
       where: {
         id: id,
       },
     });
 
-    if (serviceRaw != null) {
+    if (menuRaw != null) {
       return {
         statusCode: 200,
         status: "Success",
         message: "Data Berhasil Ditemukan!",
-        data: serviceRaw,
+        data: menuRaw,
       };
     } else {
       return {
@@ -129,13 +125,13 @@ async function byService(id) {
     console.error(error);
     return {
       status: "Error",
-      message: "Terjadi Kesalahan Saat Menampilkan Data Service!",
+      message: "Terjadi Kesalahan Saat Menampilkan Data Menu!",
       data: error.message,
     };
   }
 }
-// Fungsi untuk menampilkan Service By where
-async function byServiceWhere(whereClause, page, rowCount) {
+// Fungsi untuk menampilkan Menu By where
+async function byMenuWhere(whereClause, page, rowCount) {
   try {
     // Inisialisasi pagination
     let limit = null; // Tanpa batas limit
@@ -146,19 +142,20 @@ async function byServiceWhere(whereClause, page, rowCount) {
       limit = parseInt(rowCount);
       offset = (page - 1) * limit; // Menghitung offset
     }
-    const totalData = await Service.findAll({ where: whereClause });
-    const ServiceData = await Service.findAll({
+    const totalData = await Menu.findAll({ where: whereClause });
+    const MenuData = await Menu.findAll({
       where: whereClause,
+      exclude: ["password"], // Mengecualikan field password,
       limit: limit, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
       offset: offset, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
     });
-    if (ServiceData.length > 0) {
+    if (MenuData.length > 0) {
       return {
         statusCode: 200,
         status: "Success",
         message: "Data Berhasil Ditemukan!",
         totalData: totalData.length,
-        data: ServiceData,
+        data: MenuData,
       };
     } else {
       return {
@@ -171,29 +168,29 @@ async function byServiceWhere(whereClause, page, rowCount) {
     console.error(error);
     return {
       status: "Error",
-      message: "Terjadi Kesalahan Saat Menampilkan Data Service!",
+      message: "Terjadi Kesalahan Saat Menampilkan Data Menu!",
       data: error.message,
     };
   }
 }
 
-async function addService(dataService) {
+async function addMenu(dataMenu) {
   try {
-    // Gunakan metode create untuk menambah data ke dalam tabel Service
-    const newService = await Service.create(dataService);
+    // Gunakan metode create untuk menambah data ke dalam tabel Menu
+    const newMenu = await Menu.create(dataMenu);
 
-    if (newService) {
+    if (newMenu) {
       return {
         statusCode: 201,
         status: "Success",
-        message: "Service berhasil ditambahkan!",
-        data: newService,
+        message: "Menu berhasil ditambahkan!",
+        data: newMenu,
       };
     } else {
       return {
         statusCode: 400,
         status: "Bad Request",
-        message: "Gagal menambahkan Service.",
+        message: "Gagal menambahkan Menu.",
       };
     }
   } catch (error) {
@@ -201,39 +198,39 @@ async function addService(dataService) {
     return {
       statusCode: 500,
       status: "Error",
-      message: "Terjadi kesalahan saat menambahkan Service.",
+      message: "Terjadi kesalahan saat menambahkan Menu.",
       data: error.message,
     };
   }
 }
-// Fungsi untuk mengubah Service
-async function updateService(id, dataService) {
+// Fungsi untuk mengubah Menu
+async function updateMenu(id, dataMenu) {
   try {
-    // Cek apakah Service dengan id yang diberikan ada dalam database
-    const existingDataService = await Service.findByPk(id);
-    if (!existingDataService) {
+    // Cek apakah Menu dengan id yang diberikan ada dalam database
+    const existingDataMenu = await Menu.findByPk(id);
+    if (!existingDataMenu) {
       return {
         statusCode: 404,
         status: "Not Found",
-        message: "Data Service tidak ditemukan.",
+        message: "Data Menu tidak ditemukan.",
       };
     }
 
-    // Gunakan metode create untuk mengubah data ke dalam tabel Service
-    const updatedService = await existingDataService.update(dataService);
+    // Gunakan metode create untuk mengubah data ke dalam tabel Menu
+    const updatedMenu = await existingDataMenu.update(dataMenu);
 
-    if (updatedService) {
+    if (updatedMenu) {
       return {
         statusCode: 200,
         status: "Success",
-        message: "Service berhasil diperbaharui!",
-        data: updatedService,
+        message: "Menu berhasil diperbaharui!",
+        data: updatedMenu,
       };
     } else {
       return {
         statusCode: 400,
         status: "Bad Request",
-        message: "Gagal memperbaharui Service.",
+        message: "Gagal memperbaharui Menu.",
       };
     }
   } catch (error) {
@@ -241,32 +238,32 @@ async function updateService(id, dataService) {
     return {
       statusCode: 500,
       status: "Error",
-      message: "Terjadi kesalahan saat memperbaharui Service.",
+      message: "Terjadi kesalahan saat memperbaharui Menu.",
       data: error.message,
     };
   }
 }
 
-// Fungsi untuk menghapus Service
-async function deleteService(id) {
+// Fungsi untuk menghapus Menu
+async function deleteMenu(id) {
   try {
-    // Cek apakah Service dengan id yang diberikan ada dalam database
-    const existingService = await Service.findByPk(id);
-    if (!existingService) {
+    // Cek apakah Menu dengan id yang diberikan ada dalam database
+    const existingMenu = await Menu.findByPk(id);
+    if (!existingMenu) {
       return {
         statusCode: 404,
         status: "Not Found",
-        message: "Data Service tidak ditemukan.",
+        message: "Data Menu tidak ditemukan.",
       };
     }
 
-    // Gunakan metode destroy untuk menghapus data dari tabel Service
-    await existingService.destroy();
+    // Gunakan metode destroy untuk menghapus data dari tabel Menu
+    await existingMenu.destroy();
 
     return {
       statusCode: 200,
       status: "Success",
-      message: "Service berhasil dihapus!",
+      message: "Menu berhasil dihapus!",
     };
   } catch (error) {
     console.error(error);
@@ -280,10 +277,10 @@ async function deleteService(id) {
 }
 
 module.exports = {
-  service,
-  byService,
-  byServiceWhere,
-  addService,
-  updateService,
-  deleteService,
+  menu,
+  byMenu,
+  byMenuWhere,
+  addMenu,
+  updateMenu,
+  deleteMenu,
 };

@@ -7,6 +7,18 @@ module.exports = {
         primaryKey: true,
         autoIncrement: true
       },
+      lang: {
+        type: Sequelize.STRING(50),
+        allowNull: true
+      },
+      title_name: {
+        type: Sequelize.STRING(255),
+        allowNull: true
+      },
+      group: {
+        type: Sequelize.STRING(255),
+        allowNull: true
+      },
       name: {
         type: Sequelize.STRING(100),
         allowNull: true
@@ -21,6 +33,19 @@ module.exports = {
       },
       image: {
         type: Sequelize.STRING(50),
+        allowNull: true
+      },
+      status: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 1
+      },
+      insert_date: {
+        type: Sequelize.DATE,
+        allowNull: true
+      },
+      update_date: {
+        type: Sequelize.DATE,
         allowNull: true
       }
     });

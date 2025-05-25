@@ -5,13 +5,16 @@ require("dotenv").config();
 const logger = require("../config/logger");
 
 const {
-  slider,
-  bySlider,
-  bySliderWhere,
-  addSlider,
-  updateSlider,
-  deleteSlider,
-} = require("../models/modelSlider");
+  addCatalogues,
+  updateCatalogues,
+  deleteCatalogues,
+} = require("../models/modelCatalogue");
+const {
+  catalogues,
+  byCatalogues,
+  byCataloguesWhere
+} = require("../models/modelCataloguesView");
+const { type } = require("os");
 
 const response500 = {
   status: "Error",
@@ -22,7 +25,7 @@ const response400 = {
   message: "Bad Request!",
 };
 
-exports.slider = async (req, res) => {
+exports.catalogues = async (req, res) => {
   const log = logger.loggerData({ req });
 
   try {
@@ -30,15 +33,15 @@ exports.slider = async (req, res) => {
     const page = req.query.page;
     const rowCount = req.query.row_count;
 
-    const dataSlider = await slider(page, rowCount);
+    const dataCatalogues = await catalogues(page, rowCount);
 
     const response = {
-      statusCode: dataSlider.statusCode,
-      status: dataSlider.status,
-      message: dataSlider.message,
+      statusCode: dataCatalogues.statusCode,
+      status: dataCatalogues.status,
+      message: dataCatalogues.message,
       transactioId: log.TransactionID,
-      totalData: dataSlider.totalData,
-      data: dataSlider.data,
+      totalData: dataCatalogues.totalData,
+      data: dataCatalogues.data,
     };
     logger.loggerData({
       timeStart: log.TimeStamp,
@@ -47,7 +50,7 @@ exports.slider = async (req, res) => {
       flag: "STOP",
       message: response.message,
     });
-    res.status(dataSlider.statusCode).json(response);
+    res.status(dataCatalogues.statusCode).json(response);
   } catch (error) {
     // console.log(error);
     logger.loggerData({
@@ -62,20 +65,20 @@ exports.slider = async (req, res) => {
   }
 };
 
-// slider by id
-exports.bySlider = async (req, res) => {
+// catalogues by id
+exports.byCatalogues = async (req, res) => {
   const log = logger.loggerData({ req });
   const id = req.params.id;
   if (id) {
     try {
-      const dataSlider = await bySlider(id);
+      const dataCatalogues = await byCatalogues(id);
 
       const response = {
-        statusCode: dataSlider.statusCode,
-        status: dataSlider.status,
-        message: dataSlider.message,
+        statusCode: dataCatalogues.statusCode,
+        status: dataCatalogues.status,
+        message: dataCatalogues.message,
         transactionId: log.TransactionID,
-        data: dataSlider.data,
+        data: dataCatalogues.data,
       };
       logger.loggerData({
         timeStart: log.TimeStamp,
@@ -84,7 +87,7 @@ exports.bySlider = async (req, res) => {
         flag: "STOP",
         message: response.message,
       });
-      res.status(dataSlider.statusCode).json(response);
+      res.status(dataCatalogues.statusCode).json(response);
     } catch (error) {
       logger.loggerData({
         timeStart: log.TimeStamp,
@@ -108,10 +111,10 @@ exports.bySlider = async (req, res) => {
     res.status(400).json(response400);
   }
 };
-// slider by where
-exports.bySliderWhere = async (req, res) => {
+// catalogues by where
+exports.byCataloguesWhere = async (req, res) => {
   const log = logger.loggerData({ req });
-  const { id,lang, status } = req.body;
+  const { id,lang,id_merek,id_category, status } = req.body;
   // Ambil parameter page dan row_count dari query string
   const page = req.query.page;
   const rowCount = req.query.row_count;
@@ -126,19 +129,26 @@ exports.bySliderWhere = async (req, res) => {
     if (lang) {
       whereClause.lang = lang;
     }
-    // Cek jika parameter status_aktif
+    // Cek jika parameter id_merek
+    if (id_merek) {
+      whereClause.id_merek = id_merek;
+    }
+    // Cek jika parameter id_category
+    if (id_category) {
+      whereClause.id_category = id_category;
+    }
     if (status) {
       whereClause.status = status;
     }
-    const databySliderWhere = await bySliderWhere(whereClause, page, rowCount);
+    const databyCataloguesWhere = await byCataloguesWhere(whereClause, page, rowCount);
 
     const response = {
-      statusCode: databySliderWhere.statusCode,
-      status: databySliderWhere.status,
-      message: databySliderWhere.message,
+      statusCode: databyCataloguesWhere.statusCode,
+      status: databyCataloguesWhere.status,
+      message: databyCataloguesWhere.message,
       transactionId: log.TransactionID,
-      totalData: databySliderWhere.totalData,
-      data: databySliderWhere.data,
+      totalData: databyCataloguesWhere.totalData,
+      data: databyCataloguesWhere.data,
     };
     logger.loggerData({
       timeStart: log.TimeStamp,
@@ -147,7 +157,7 @@ exports.bySliderWhere = async (req, res) => {
       flag: "STOP",
       message: response.message,
     });
-    res.status(databySliderWhere.statusCode).json(response);
+    res.status(databyCataloguesWhere.statusCode).json(response);
   } catch (error) {
     logger.loggerData({
       timeStart: log.TimeStamp,
@@ -161,8 +171,8 @@ exports.bySliderWhere = async (req, res) => {
   }
 };
 
-// add Slider
-exports.addSlider = async (req, res) => {
+// add Catalogues
+exports.addCatalogues = async (req, res) => {
   const log = logger.loggerData({ req });
   const token = req.headers["authorization"];
   const validToken = token.split(" ");
@@ -173,32 +183,38 @@ exports.addSlider = async (req, res) => {
 
   const {
     lang,
-    title,
+    slug,
+    name,
+    id_merk,
+    description,
+    spec,
     image,
-    text,
-    link,
-    status
+    id_category,
+    status,
   } = req.body;
   try {
-    const dataSlider = {
+    const dataCatalogues = {
       lang:lang,
-      title: title,
+      slug: slug,
+      name: name,
+      id_merk: id_merk,
+      description: description,
+      spec: spec,
       image: image,
-      text: text,
-      link: link,
+      id_category: id_category,
       status: status,
       insert_date: new Date(),
       insert_by: userLogin
     };
-    // console.log(dataSlider);
-    const dataSliderAdded = await addSlider(dataSlider);
+    // console.log(dataCatalogues);
+    const dataCataloguesAdded = await addCatalogues(dataCatalogues);
 
     const response = {
-      statusCode: dataSliderAdded.statusCode,
-      status: dataSliderAdded.status,
-      message: dataSliderAdded.message,
+      statusCode: dataCataloguesAdded.statusCode,
+      status: dataCataloguesAdded.status,
+      message: dataCataloguesAdded.message,
       transactioId: log.TransactionID,
-      data: dataSliderAdded.data,
+      data: dataCataloguesAdded.data,
     };
 
     logger.loggerData({
@@ -208,7 +224,7 @@ exports.addSlider = async (req, res) => {
       flag: "STOP",
       message: response.message,
     });
-    res.status(dataSliderAdded.statusCode).json(response);
+    res.status(dataCataloguesAdded.statusCode).json(response);
   } catch (error) {
     logger.loggerData({
       timeStart: log.TimeStamp,
@@ -221,8 +237,8 @@ exports.addSlider = async (req, res) => {
     res.status(500).json(response500);
   }
 };
-// update Slider
-exports.updateSlider = async (req, res) => {
+// update Catalogues
+exports.updateCatalogues = async (req, res) => {
   const log = logger.loggerData({ req });
   const token = req.headers["authorization"];
   const validToken = token.split(" ");
@@ -234,30 +250,36 @@ exports.updateSlider = async (req, res) => {
   const {
     id,
     lang,
-    title,
+    slug,
+    name,
+    id_merek,
+    description,
+    spec,
     image,
-    text,
-    link,
-    status
+    id_category,
+    status,
   } = req.body;
   try {
-    const dataSlider = {
+    const dataCatalogues = {
         lang:lang,
-        title: title,
+        slug: slug,
+        name: name,
+        id_merek: id_merek,
+        description: description,
+        spec: spec,
         image: image,
-        text: text,
-        link: link,
+        id_category: id_category,
         status: status,
     };
-    // console.log(dataSlider);
-    const dataSliderUpdated = await updateSlider(id, dataSlider);
+    // console.log(dataCatalogues);
+    const dataCataloguesUpdated = await updateCatalogues(id, dataCatalogues);
 
     const response = {
-      statusCode: dataSliderUpdated.statusCode,
-      status: dataSliderUpdated.status,
-      message: dataSliderUpdated.message,
+      statusCode: dataCataloguesUpdated.statusCode,
+      status: dataCataloguesUpdated.status,
+      message: dataCataloguesUpdated.message,
       transactioId: log.TransactionID,
-      data: dataSliderUpdated.data,
+      data: dataCataloguesUpdated.data,
     };
 
     logger.loggerData({
@@ -267,7 +289,7 @@ exports.updateSlider = async (req, res) => {
       flag: "STOP",
       message: response.message,
     });
-    res.status(dataSliderUpdated.statusCode).json(response);
+    res.status(dataCataloguesUpdated.statusCode).json(response);
   } catch (error) {
     logger.loggerData({
       timeStart: log.TimeStamp,
@@ -281,20 +303,20 @@ exports.updateSlider = async (req, res) => {
   }
 };
 
-//delete Slider by id Slider
-exports.deleteSlider = async (req, res) => {
+//delete Catalogues by id Catalogues
+exports.deleteCatalogues = async (req, res) => {
   const log = logger.loggerData({ req });
   const id = req.params.id;
   if (id) {
     try {
-      const dataSliderDeleted = await deleteSlider(id);
+      const dataCataloguesDeleted = await deleteCatalogues(id);
 
       const response = {
-        statusCode: dataSliderDeleted.statusCode,
-        status: dataSliderDeleted.status,
-        message: dataSliderDeleted.message,
+        statusCode: dataCataloguesDeleted.statusCode,
+        status: dataCataloguesDeleted.status,
+        message: dataCataloguesDeleted.message,
         transactioId: log.TransactionID,
-        data: dataSliderDeleted.data,
+        data: dataCataloguesDeleted.data,
       };
 
       logger.loggerData({
@@ -304,7 +326,7 @@ exports.deleteSlider = async (req, res) => {
         flag: "STOP",
         message: response.message,
       });
-      res.status(dataSliderDeleted.statusCode).json(response);
+      res.status(dataCataloguesDeleted.statusCode).json(response);
     } catch (error) {
       logger.loggerData({
         timeStart: log.TimeStamp,

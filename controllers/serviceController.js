@@ -5,13 +5,13 @@ require("dotenv").config();
 const logger = require("../config/logger");
 
 const {
-  slider,
-  bySlider,
-  bySliderWhere,
-  addSlider,
-  updateSlider,
-  deleteSlider,
-} = require("../models/modelSlider");
+  service,
+  byService,
+  byServiceWhere,
+  addService,
+  updateService,
+  deleteService,
+} = require("../models/modelService");
 
 const response500 = {
   status: "Error",
@@ -22,7 +22,7 @@ const response400 = {
   message: "Bad Request!",
 };
 
-exports.slider = async (req, res) => {
+exports.service = async (req, res) => {
   const log = logger.loggerData({ req });
 
   try {
@@ -30,15 +30,15 @@ exports.slider = async (req, res) => {
     const page = req.query.page;
     const rowCount = req.query.row_count;
 
-    const dataSlider = await slider(page, rowCount);
+    const dataService = await service(page, rowCount);
 
     const response = {
-      statusCode: dataSlider.statusCode,
-      status: dataSlider.status,
-      message: dataSlider.message,
+      statusCode: dataService.statusCode,
+      status: dataService.status,
+      message: dataService.message,
       transactioId: log.TransactionID,
-      totalData: dataSlider.totalData,
-      data: dataSlider.data,
+      totalData: dataService.totalData,
+      data: dataService.data,
     };
     logger.loggerData({
       timeStart: log.TimeStamp,
@@ -47,7 +47,7 @@ exports.slider = async (req, res) => {
       flag: "STOP",
       message: response.message,
     });
-    res.status(dataSlider.statusCode).json(response);
+    res.status(dataService.statusCode).json(response);
   } catch (error) {
     // console.log(error);
     logger.loggerData({
@@ -62,20 +62,20 @@ exports.slider = async (req, res) => {
   }
 };
 
-// slider by id
-exports.bySlider = async (req, res) => {
+// service by id
+exports.byService = async (req, res) => {
   const log = logger.loggerData({ req });
   const id = req.params.id;
   if (id) {
     try {
-      const dataSlider = await bySlider(id);
+      const dataService = await byService(id);
 
       const response = {
-        statusCode: dataSlider.statusCode,
-        status: dataSlider.status,
-        message: dataSlider.message,
+        statusCode: dataService.statusCode,
+        status: dataService.status,
+        message: dataService.message,
         transactionId: log.TransactionID,
-        data: dataSlider.data,
+        data: dataService.data,
       };
       logger.loggerData({
         timeStart: log.TimeStamp,
@@ -84,7 +84,7 @@ exports.bySlider = async (req, res) => {
         flag: "STOP",
         message: response.message,
       });
-      res.status(dataSlider.statusCode).json(response);
+      res.status(dataService.statusCode).json(response);
     } catch (error) {
       logger.loggerData({
         timeStart: log.TimeStamp,
@@ -108,10 +108,10 @@ exports.bySlider = async (req, res) => {
     res.status(400).json(response400);
   }
 };
-// slider by where
-exports.bySliderWhere = async (req, res) => {
+// service by where
+exports.byServiceWhere = async (req, res) => {
   const log = logger.loggerData({ req });
-  const { id,lang, status } = req.body;
+  const { id,lang,group, status } = req.body;
   // Ambil parameter page dan row_count dari query string
   const page = req.query.page;
   const rowCount = req.query.row_count;
@@ -126,19 +126,22 @@ exports.bySliderWhere = async (req, res) => {
     if (lang) {
       whereClause.lang = lang;
     }
-    // Cek jika parameter status_aktif
+    // Cek jika parameter group
+    if (group) {
+      whereClause.group = group;
+    }
     if (status) {
       whereClause.status = status;
     }
-    const databySliderWhere = await bySliderWhere(whereClause, page, rowCount);
+    const databyServiceWhere = await byServiceWhere(whereClause, page, rowCount);
 
     const response = {
-      statusCode: databySliderWhere.statusCode,
-      status: databySliderWhere.status,
-      message: databySliderWhere.message,
+      statusCode: databyServiceWhere.statusCode,
+      status: databyServiceWhere.status,
+      message: databyServiceWhere.message,
       transactionId: log.TransactionID,
-      totalData: databySliderWhere.totalData,
-      data: databySliderWhere.data,
+      totalData: databyServiceWhere.totalData,
+      data: databyServiceWhere.data,
     };
     logger.loggerData({
       timeStart: log.TimeStamp,
@@ -147,7 +150,7 @@ exports.bySliderWhere = async (req, res) => {
       flag: "STOP",
       message: response.message,
     });
-    res.status(databySliderWhere.statusCode).json(response);
+    res.status(databyServiceWhere.statusCode).json(response);
   } catch (error) {
     logger.loggerData({
       timeStart: log.TimeStamp,
@@ -161,8 +164,8 @@ exports.bySliderWhere = async (req, res) => {
   }
 };
 
-// add Slider
-exports.addSlider = async (req, res) => {
+// add Service
+exports.addService = async (req, res) => {
   const log = logger.loggerData({ req });
   const token = req.headers["authorization"];
   const validToken = token.split(" ");
@@ -173,32 +176,34 @@ exports.addSlider = async (req, res) => {
 
   const {
     lang,
-    title,
+    group,
+    name,
+    preface,
+    detail,
     image,
-    text,
-    link,
-    status
+    status,
   } = req.body;
   try {
-    const dataSlider = {
+    const dataService = {
       lang:lang,
-      title: title,
+      group: group,
+      name: name,
+      preface: preface,
+      detail: detail,
       image: image,
-      text: text,
-      link: link,
       status: status,
       insert_date: new Date(),
       insert_by: userLogin
     };
-    // console.log(dataSlider);
-    const dataSliderAdded = await addSlider(dataSlider);
+    // console.log(dataService);
+    const dataServiceAdded = await addService(dataService);
 
     const response = {
-      statusCode: dataSliderAdded.statusCode,
-      status: dataSliderAdded.status,
-      message: dataSliderAdded.message,
+      statusCode: dataServiceAdded.statusCode,
+      status: dataServiceAdded.status,
+      message: dataServiceAdded.message,
       transactioId: log.TransactionID,
-      data: dataSliderAdded.data,
+      data: dataServiceAdded.data,
     };
 
     logger.loggerData({
@@ -208,7 +213,7 @@ exports.addSlider = async (req, res) => {
       flag: "STOP",
       message: response.message,
     });
-    res.status(dataSliderAdded.statusCode).json(response);
+    res.status(dataServiceAdded.statusCode).json(response);
   } catch (error) {
     logger.loggerData({
       timeStart: log.TimeStamp,
@@ -221,8 +226,8 @@ exports.addSlider = async (req, res) => {
     res.status(500).json(response500);
   }
 };
-// update Slider
-exports.updateSlider = async (req, res) => {
+// update Service
+exports.updateService = async (req, res) => {
   const log = logger.loggerData({ req });
   const token = req.headers["authorization"];
   const validToken = token.split(" ");
@@ -234,30 +239,32 @@ exports.updateSlider = async (req, res) => {
   const {
     id,
     lang,
-    title,
+    group,
+    name,
+    preface,
+    detail,
     image,
-    text,
-    link,
-    status
+    status,
   } = req.body;
   try {
-    const dataSlider = {
+    const dataService = {
         lang:lang,
-        title: title,
+        group: group,
+        name: name,
+        preface: preface,
+        detail: detail,
         image: image,
-        text: text,
-        link: link,
         status: status,
     };
-    // console.log(dataSlider);
-    const dataSliderUpdated = await updateSlider(id, dataSlider);
+    // console.log(dataService);
+    const dataServiceUpdated = await updateService(id, dataService);
 
     const response = {
-      statusCode: dataSliderUpdated.statusCode,
-      status: dataSliderUpdated.status,
-      message: dataSliderUpdated.message,
+      statusCode: dataServiceUpdated.statusCode,
+      status: dataServiceUpdated.status,
+      message: dataServiceUpdated.message,
       transactioId: log.TransactionID,
-      data: dataSliderUpdated.data,
+      data: dataServiceUpdated.data,
     };
 
     logger.loggerData({
@@ -267,7 +274,7 @@ exports.updateSlider = async (req, res) => {
       flag: "STOP",
       message: response.message,
     });
-    res.status(dataSliderUpdated.statusCode).json(response);
+    res.status(dataServiceUpdated.statusCode).json(response);
   } catch (error) {
     logger.loggerData({
       timeStart: log.TimeStamp,
@@ -281,20 +288,20 @@ exports.updateSlider = async (req, res) => {
   }
 };
 
-//delete Slider by id Slider
-exports.deleteSlider = async (req, res) => {
+//delete Service by id Service
+exports.deleteService = async (req, res) => {
   const log = logger.loggerData({ req });
   const id = req.params.id;
   if (id) {
     try {
-      const dataSliderDeleted = await deleteSlider(id);
+      const dataServiceDeleted = await deleteService(id);
 
       const response = {
-        statusCode: dataSliderDeleted.statusCode,
-        status: dataSliderDeleted.status,
-        message: dataSliderDeleted.message,
+        statusCode: dataServiceDeleted.statusCode,
+        status: dataServiceDeleted.status,
+        message: dataServiceDeleted.message,
         transactioId: log.TransactionID,
-        data: dataSliderDeleted.data,
+        data: dataServiceDeleted.data,
       };
 
       logger.loggerData({
@@ -304,7 +311,7 @@ exports.deleteSlider = async (req, res) => {
         flag: "STOP",
         message: response.message,
       });
-      res.status(dataSliderDeleted.statusCode).json(response);
+      res.status(dataServiceDeleted.statusCode).json(response);
     } catch (error) {
       logger.loggerData({
         timeStart: log.TimeStamp,

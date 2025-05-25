@@ -10,12 +10,16 @@ const Slider = sequelizePrime.define(
       primaryKey: true,
       autoIncrement: true,
     },
+    lang: {
+      type: Sequelize.STRING(50),
+      allowNull: true
+    },
     title: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(255),
       allowNull: true,
     },
     image: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(255),
       allowNull: true,
     },
     text: {
@@ -136,7 +140,6 @@ async function bySliderWhere(whereClause, page, rowCount) {
     const totalData = await Slider.findAll({ where: whereClause });
     const SliderData = await Slider.findAll({
       where: whereClause,
-      exclude: ["password"], // Mengecualikan field password,
       limit: limit, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
       offset: offset, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
     });

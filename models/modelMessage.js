@@ -1,65 +1,61 @@
 const { sequelizePrime } = require("../config/db");
 const { Sequelize, DataTypes } = require("sequelize");
 
-const Service = sequelizePrime.define(
-  "Service",
+const Message = sequelizePrime.define(
+  "Message",
   {
     id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    lang: {
-      type: Sequelize.STRING(50),
-      allowNull: true
-    },
-    title_name: {
-      type: Sequelize.STRING(255),
-      allowNull: true
-    },
-    group: {
-      type: Sequelize.STRING(255),
-      allowNull: true
-    },
-    name: {
-      type: DataTypes.STRING(100),
-      allowNull: true,
-    },
-    preface: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
-    },
-    detail: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    image: {
-      type: DataTypes.STRING(50),
-      allowNull: true,
-    },
-    status: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 1
-    },
-    insert_date: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    update_date: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        primaryKey: true,
+        autoIncrement: true
+      },
+      lang: {
+        type: Sequelize.STRING(50),
+        allowNull: true
+      },
+      country: {
+        type: Sequelize.STRING(50),
+        allowNull: true
+      },
+      name: {
+        type: Sequelize.STRING(50),
+        allowNull: true
+      },
+      email: {
+        type: Sequelize.STRING(50),
+        allowNull: true
+      },
+      telp: {
+          type: Sequelize.STRING(50),
+          allowNull: true,
+          defaultValue: 0
+      },
+      address: {
+        type: Sequelize.TEXT,
+        allowNull: true
+      },
+      message: {
+        type: Sequelize.TEXT,
+        allowNull: true
+      },
+      status: {
+        type: Sequelize.TINYINT(1),
+        allowNull: true,
+        defaultValue: 1
+      },
+      insert_date: {
+        type: Sequelize.DATE,
+        allowNull: true
+      }
   },
   {
-    tableName: "services",
+    tableName: "message",
     timestamps: false,
   }
 );
 
-
-async function service(page, rowCount) {
+async function message(page, rowCount) {
   try {
     // Inisialisasi pagination
     let limit = null; // Tanpa batas limit
@@ -71,19 +67,19 @@ async function service(page, rowCount) {
       offset = (page - 1) * limit; // Menghitung offset
     }
 
-    const allServices = await Service.findAll({
+    const allMessages = await Message.findAll({
       limit: limit, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
       offset: offset, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
     });
-    const totalRow = await Service.count();
+    const totalRow = await Message.count();
 
-    if (allServices != null) {
+    if (allMessages != null) {
       return {
         statusCode: 200,
         status: "Success",
         message: "Data Berhasil Ditemukan!",
         totalData: totalRow,
-        data: allServices,
+        data: allMessages,
       };
     } else {
       return {
@@ -96,27 +92,27 @@ async function service(page, rowCount) {
     console.error(error);
     return {
       status: "Error",
-      message: "Terjadi Kesalahan Saat Menampilkan Data Service!",
+      message: "Terjadi Kesalahan Saat Menampilkan Data Message!",
       data: error.message,
     };
   }
 }
 
-// Fungsi untuk menampilkan Service By id
-async function byService(id) {
+// Fungsi untuk menampilkan Message By id
+async function byMessage(id) {
   try {
-    const serviceRaw = await Service.findOne({
+    const messageRaw = await Message.findOne({
       where: {
         id: id,
       },
     });
 
-    if (serviceRaw != null) {
+    if (messageRaw != null) {
       return {
         statusCode: 200,
         status: "Success",
         message: "Data Berhasil Ditemukan!",
-        data: serviceRaw,
+        data: messageRaw,
       };
     } else {
       return {
@@ -129,13 +125,13 @@ async function byService(id) {
     console.error(error);
     return {
       status: "Error",
-      message: "Terjadi Kesalahan Saat Menampilkan Data Service!",
+      message: "Terjadi Kesalahan Saat Menampilkan Data Message!",
       data: error.message,
     };
   }
 }
-// Fungsi untuk menampilkan Service By where
-async function byServiceWhere(whereClause, page, rowCount) {
+// Fungsi untuk menampilkan Message By where
+async function byMessageWhere(whereClause, page, rowCount) {
   try {
     // Inisialisasi pagination
     let limit = null; // Tanpa batas limit
@@ -146,19 +142,19 @@ async function byServiceWhere(whereClause, page, rowCount) {
       limit = parseInt(rowCount);
       offset = (page - 1) * limit; // Menghitung offset
     }
-    const totalData = await Service.findAll({ where: whereClause });
-    const ServiceData = await Service.findAll({
+    const totalData = await Message.findAll({ where: whereClause });
+    const MessageData = await Message.findAll({
       where: whereClause,
       limit: limit, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
       offset: offset, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
     });
-    if (ServiceData.length > 0) {
+    if (MessageData.length > 0) {
       return {
         statusCode: 200,
         status: "Success",
         message: "Data Berhasil Ditemukan!",
         totalData: totalData.length,
-        data: ServiceData,
+        data: MessageData,
       };
     } else {
       return {
@@ -171,29 +167,28 @@ async function byServiceWhere(whereClause, page, rowCount) {
     console.error(error);
     return {
       status: "Error",
-      message: "Terjadi Kesalahan Saat Menampilkan Data Service!",
+      message: "Terjadi Kesalahan Saat Menampilkan Data Message!",
       data: error.message,
     };
   }
 }
-
-async function addService(dataService) {
+async function addMessage(dataMessage) {
   try {
-    // Gunakan metode create untuk menambah data ke dalam tabel Service
-    const newService = await Service.create(dataService);
+    // Gunakan metode create untuk menambah data ke dalam tabel Message
+    const newMessage = await Message.create(dataMessage);
 
-    if (newService) {
+    if (newMessage) {
       return {
         statusCode: 201,
         status: "Success",
-        message: "Service berhasil ditambahkan!",
-        data: newService,
+        message: "Message berhasil ditambahkan!",
+        data: newMessage,
       };
     } else {
       return {
         statusCode: 400,
         status: "Bad Request",
-        message: "Gagal menambahkan Service.",
+        message: "Gagal menambahkan Message.",
       };
     }
   } catch (error) {
@@ -201,39 +196,39 @@ async function addService(dataService) {
     return {
       statusCode: 500,
       status: "Error",
-      message: "Terjadi kesalahan saat menambahkan Service.",
+      message: "Terjadi kesalahan saat menambahkan Message.",
       data: error.message,
     };
   }
 }
-// Fungsi untuk mengubah Service
-async function updateService(id, dataService) {
+// Fungsi untuk mengubah Message
+async function updateMessage(id, dataMessage) {
   try {
-    // Cek apakah Service dengan id yang diberikan ada dalam database
-    const existingDataService = await Service.findByPk(id);
-    if (!existingDataService) {
+    // Cek apakah Message dengan id yang diberikan ada dalam database
+    const existingDataMessage = await Message.findByPk(id);
+    if (!existingDataMessage) {
       return {
         statusCode: 404,
         status: "Not Found",
-        message: "Data Service tidak ditemukan.",
+        message: "Data Message tidak ditemukan.",
       };
     }
 
-    // Gunakan metode create untuk mengubah data ke dalam tabel Service
-    const updatedService = await existingDataService.update(dataService);
+    // Gunakan metode create untuk mengubah data ke dalam tabel Message
+    const updatedMessage = await existingDataMessage.update(dataMessage);
 
-    if (updatedService) {
+    if (updatedMessage) {
       return {
         statusCode: 200,
         status: "Success",
-        message: "Service berhasil diperbaharui!",
-        data: updatedService,
+        message: "Message berhasil diperbaharui!",
+        data: updatedMessage,
       };
     } else {
       return {
         statusCode: 400,
         status: "Bad Request",
-        message: "Gagal memperbaharui Service.",
+        message: "Gagal memperbaharui Message.",
       };
     }
   } catch (error) {
@@ -241,32 +236,32 @@ async function updateService(id, dataService) {
     return {
       statusCode: 500,
       status: "Error",
-      message: "Terjadi kesalahan saat memperbaharui Service.",
+      message: "Terjadi kesalahan saat memperbaharui Message.",
       data: error.message,
     };
   }
 }
 
-// Fungsi untuk menghapus Service
-async function deleteService(id) {
+// Fungsi untuk menghapus Message
+async function deleteMessage(id) {
   try {
-    // Cek apakah Service dengan id yang diberikan ada dalam database
-    const existingService = await Service.findByPk(id);
-    if (!existingService) {
+    // Cek apakah Message dengan id yang diberikan ada dalam database
+    const existingMessage = await Message.findByPk(id);
+    if (!existingMessage) {
       return {
         statusCode: 404,
         status: "Not Found",
-        message: "Data Service tidak ditemukan.",
+        message: "Data Message tidak ditemukan.",
       };
     }
 
-    // Gunakan metode destroy untuk menghapus data dari tabel Service
-    await existingService.destroy();
+    // Gunakan metode destroy untuk menghapus data dari tabel Message
+    await existingMessage.destroy();
 
     return {
       statusCode: 200,
       status: "Success",
-      message: "Service berhasil dihapus!",
+      message: "Message berhasil dihapus!",
     };
   } catch (error) {
     console.error(error);
@@ -280,10 +275,10 @@ async function deleteService(id) {
 }
 
 module.exports = {
-  service,
-  byService,
-  byServiceWhere,
-  addService,
-  updateService,
-  deleteService,
+  message,
+  byMessage,
+  byMessageWhere,
+  addMessage,
+  updateMessage,
+  deleteMessage,
 };
