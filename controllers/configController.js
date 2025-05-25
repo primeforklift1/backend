@@ -111,15 +111,15 @@ exports.byConfig = async (req, res) => {
 // config by where
 exports.byConfigWhere = async (req, res) => {
   const log = logger.loggerData({ req });
-  const { id,lang,config_type, status } = req.body;
+  const { config_id,lang,config_type, status } = req.body;
   // Ambil parameter page dan row_count dari query string
   const page = req.query.page;
   const rowCount = req.query.row_count;
   try {
     let whereClause = {};
     // Cek jika parameter id_pengguna
-    if (id) {
-      whereClause.id = id;
+    if (config_id) {
+      whereClause.config_id = config_id;
     }
 
     // Cek jika parameter lang

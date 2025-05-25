@@ -110,7 +110,7 @@ async function byConfig(id) {
   try {
     const configRaw = await Config.findOne({
       where: {
-        id: id,
+        config_id: id,
       },
     });
 
