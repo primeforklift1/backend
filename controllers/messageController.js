@@ -112,7 +112,7 @@ exports.byMessage = async (req, res) => {
 // Message by where
 exports.byMessageWhere = async (req, res) => {
     const log = logger.loggerData({ req });
-    const { id,lang,country, email, status } = req.body;
+    const { id,group_s, lang,country, email, status } = req.body;
     // Ambil parameter page dan row_count dari query string
     const page = req.query.page;
     const rowCount = req.query.row_count;
@@ -125,6 +125,10 @@ exports.byMessageWhere = async (req, res) => {
       // Cek jika parameter lang
       if (lang) {
         whereClause.lang = lang;
+      }
+
+      if (group_s) {
+        whereClause.group_s = group_s;
       }
       // Cek jika parameter country
       if (country) {
@@ -181,6 +185,7 @@ exports.addMessage = async (req, res) => {
 
     const {
         lang,
+        group_s,
         country,
         name,
         email,
@@ -192,6 +197,7 @@ exports.addMessage = async (req, res) => {
     try {
         const dataMessage = {
             lang: lang,
+            group_s: group_s,
             country: country,
             name: name,
             email: email,
@@ -245,6 +251,7 @@ exports.updateMessage = async (req, res) => {
     // console.log(userLogin);
     const {
         id,
+        group_s,
         lang,
         country,
         name,
@@ -256,6 +263,7 @@ exports.updateMessage = async (req, res) => {
     } = req.body;
     try {
         const dataMessage = {
+            group_s: group_s,
             lang: lang,
             country: country,
             name: name,

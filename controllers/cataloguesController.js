@@ -114,7 +114,7 @@ exports.byCatalogues = async (req, res) => {
 // catalogues by where
 exports.byCataloguesWhere = async (req, res) => {
   const log = logger.loggerData({ req });
-  const { id,lang,id_merek,id_category, status } = req.body;
+  const { id,group_s,lang,id_merek,id_category, status } = req.body;
   // Ambil parameter page dan row_count dari query string
   const page = req.query.page;
   const rowCount = req.query.row_count;
@@ -128,6 +128,9 @@ exports.byCataloguesWhere = async (req, res) => {
     // Cek jika parameter lang
     if (lang) {
       whereClause.lang = lang;
+    }
+    if (group_s) {
+      whereClause.group_s = group_s;
     }
     // Cek jika parameter id_merek
     if (id_merek) {
@@ -182,6 +185,7 @@ exports.addCatalogues = async (req, res) => {
   });
 
   const {
+    group_s,
     lang,
     slug,
     name,
@@ -194,6 +198,7 @@ exports.addCatalogues = async (req, res) => {
   } = req.body;
   try {
     const dataCatalogues = {
+      group_s:group_s,
       lang:lang,
       slug: slug,
       name: name,
@@ -249,6 +254,7 @@ exports.updateCatalogues = async (req, res) => {
   // console.log(userLogin);
   const {
     id,
+    group_s,
     lang,
     slug,
     name,
@@ -261,6 +267,7 @@ exports.updateCatalogues = async (req, res) => {
   } = req.body;
   try {
     const dataCatalogues = {
+        group_s:group_s,
         lang:lang,
         slug: slug,
         name: name,

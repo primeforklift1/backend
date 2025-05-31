@@ -221,6 +221,7 @@ app.get("/", limiter, (req, res) => {
   res.status(200).json({ status: "Sukses", message: "API Ready" });
 });
 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API Public and Management =====================================================================================================================
 
@@ -250,7 +251,9 @@ app.post(
     
 
     // kirim ke ci4
-    const fullFilePath = path.join(__dirname, "uploads", req.uploadedFileName);
+    const public_image = process.env.API_URL+':'+process.env.APP_PORT;
+    // const fullFilePath = path.join(public_image, "uploads", req.uploadedFileName);
+    const fullFilePath = public_image+"/uploads/"+req.uploadedFileName;
     console.log(fullFilePath);
     
     try {
@@ -258,8 +261,9 @@ app.post(
         const ci4Response = await axios.post(
           process.env.CLIENT_URL + '/copy-node-file',
           qs.stringify({
-            sourcePath: fullFilePath,
-            sourceDir: 'uploads/'
+            sourceUrl: fullFilePath,
+            sourceDir: 'uploads/',
+            targetDir: 'uploads/'
           }),
           {
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }

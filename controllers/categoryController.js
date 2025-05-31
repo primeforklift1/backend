@@ -112,7 +112,7 @@ exports.byCategory = async (req, res) => {
 // Category by where
 exports.byCategoryWhere = async (req, res) => {
     const log = logger.loggerData({ req });
-    const { id,lang, status } = req.body;
+    const { id,group_s, lang, status } = req.body;
     // Ambil parameter page dan row_count dari query string
     const page = req.query.page;
     const rowCount = req.query.row_count;
@@ -125,6 +125,10 @@ exports.byCategoryWhere = async (req, res) => {
       // Cek jika parameter lang
       if (lang) {
         whereClause.lang = lang;
+      }
+
+      if (group_s) {
+        whereClause.group_s = group_s;
       }
   
       if (status) {
@@ -172,6 +176,7 @@ exports.addCategory = async (req, res) => {
     });
 
     const {
+        group_s,
         lang,
         parent_id,
         name,
@@ -179,6 +184,7 @@ exports.addCategory = async (req, res) => {
     } = req.body;
     try {
         const dataCategory = {
+            group_s: group_s,
             lang: lang,
             parent_id: parent_id,
             name: name,
@@ -229,6 +235,7 @@ exports.updateCategory = async (req, res) => {
     // console.log(userLogin);
     const {
         id,
+        group_s,
         lang,
         parent_id,
         name,
@@ -236,6 +243,7 @@ exports.updateCategory = async (req, res) => {
     } = req.body;
     try {
         const dataCategory = {
+            group_s: group_s,
             lang: lang,
             parent_id: parent_id,
             name: name,

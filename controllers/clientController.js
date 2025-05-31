@@ -112,7 +112,7 @@ exports.byClient = async (req, res) => {
 // Client by where
 exports.byClientWhere = async (req, res) => {
     const log = logger.loggerData({ req });
-    const { id, lang, status } = req.body;
+    const { id, group_s, lang, status } = req.body;
     // Ambil parameter page dan row_count dari query string
     const page = req.query.page;
     const rowCount = req.query.row_count;
@@ -125,6 +125,10 @@ exports.byClientWhere = async (req, res) => {
         }
         if (lang) {
             whereClause.lang = lang;
+        }
+
+        if (group_s) {
+            whereClause.group_s = group_s;
         }
         // Cek jika parameter status_aktif
         if (status) {
@@ -173,6 +177,7 @@ exports.addClient = async (req, res) => {
 
     const {
         lang,
+        group_s,
         name,
         image,
         link,
@@ -180,6 +185,7 @@ exports.addClient = async (req, res) => {
     } = req.body;
     try {
         const dataClient = {
+            group_s: group_s,
             lang: lang,
             name: name,
             image: image,
@@ -231,6 +237,7 @@ exports.updateClient = async (req, res) => {
     // console.log(userLogin);
     const {
         id,
+        group_s,
         lang,
         name,
         image,
@@ -239,6 +246,7 @@ exports.updateClient = async (req, res) => {
     } = req.body;
     try {
         const dataClient = {
+            group_s:group_s,
             lang:lang,
             name: name,
             image: image,

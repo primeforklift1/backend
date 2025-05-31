@@ -113,7 +113,7 @@ exports.byArticle = async (req, res) => {
 // article by where
 exports.byArticleWhere = async (req, res) => {
   const log = logger.loggerData({ req });
-  const { id,lang, status } = req.body;
+  const { id, group_s, lang, status } = req.body;
   // Ambil parameter page dan row_count dari query string
   const page = req.query.page;
   const rowCount = req.query.row_count;
@@ -127,6 +127,10 @@ exports.byArticleWhere = async (req, res) => {
     // Cek jika parameter lang
     if (lang) {
       whereClause.lang = lang;
+    }
+
+    if (group_s) {
+      whereClause.group_s = group_s;
     }
     if (status) {
       whereClause.status = status;
@@ -173,6 +177,7 @@ exports.addArticle = async (req, res) => {
   });
 
   const {
+    group_s,
     lang,
     slug,
     title,
@@ -184,6 +189,7 @@ exports.addArticle = async (req, res) => {
   } = req.body;
   try {
     const dataArticle = {
+      group_s:group_s,
       lang:lang,
       slug: slug,
       title: title,
@@ -238,6 +244,7 @@ exports.updateArticle = async (req, res) => {
   // console.log(userLogin);
   const {
     id,
+    group_s,
     lang,
     slug,
     title,
@@ -249,6 +256,7 @@ exports.updateArticle = async (req, res) => {
   } = req.body;
   try {
     const dataArticle = {
+      group_s:group_s,
       lang:lang,
       slug: slug,
       title: title,
