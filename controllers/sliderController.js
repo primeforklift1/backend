@@ -111,7 +111,7 @@ exports.bySlider = async (req, res) => {
 // slider by where
 exports.bySliderWhere = async (req, res) => {
   const log = logger.loggerData({ req });
-  const { id,lang, status } = req.body;
+  const { id,group_s, lang, status } = req.body;
   // Ambil parameter page dan row_count dari query string
   const page = req.query.page;
   const rowCount = req.query.row_count;
@@ -125,6 +125,9 @@ exports.bySliderWhere = async (req, res) => {
     // Cek jika parameter lang
     if (lang) {
       whereClause.lang = lang;
+    }
+    if (group_s) {
+      whereClause.group_s = group_s;
     }
     // Cek jika parameter status_aktif
     if (status) {
@@ -172,6 +175,7 @@ exports.addSlider = async (req, res) => {
   });
 
   const {
+    group_s,
     lang,
     title,
     image,
@@ -181,6 +185,7 @@ exports.addSlider = async (req, res) => {
   } = req.body;
   try {
     const dataSlider = {
+      group_s:group_s,
       lang:lang,
       title: title,
       image: image,
@@ -233,6 +238,7 @@ exports.updateSlider = async (req, res) => {
   // console.log(userLogin);
   const {
     id,
+    group_s,
     lang,
     title,
     image,
@@ -242,6 +248,7 @@ exports.updateSlider = async (req, res) => {
   } = req.body;
   try {
     const dataSlider = {
+        group_s:group_s,
         lang:lang,
         title: title,
         image: image,

@@ -7,6 +7,10 @@ module.exports = {
         primaryKey: true,
         autoIncrement: true
       },
+      group_s: {
+        type: Sequelize.INTEGER,
+        allowNull: true
+      },
       lang: {
         type: Sequelize.STRING(50),
         allowNull: true

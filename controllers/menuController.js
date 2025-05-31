@@ -111,7 +111,7 @@ exports.byMenu = async (req, res) => {
 // Menu by where
 exports.byMenuWhere = async (req, res) => {
     const log = logger.loggerData({ req });
-    const { id, lang, status } = req.body;
+    const { id, group_s, lang, status } = req.body;
     // Ambil parameter page dan row_count dari query string
     const page = req.query.page;
     const rowCount = req.query.row_count;
@@ -125,6 +125,9 @@ exports.byMenuWhere = async (req, res) => {
       // Cek jika parameter lang
       if (lang) {
         whereClause.lang = lang;
+      }
+      if (group_s) {
+        whereClause.group_s = group_s;
       }
       // Cek jika parameter status_aktif
       if (status) {
@@ -193,7 +196,7 @@ exports.byMenuWhere = async (req, res) => {
   // Menu by where
   exports.byMenuWhereAll = async (req, res) => {
       const log = logger.loggerData({ req });
-      const { id, lang, status } = req.body;
+      const { id, group_s, lang, status } = req.body;
       // Ambil parameter page dan row_count dari query string
       const page = req.query.page;
       const rowCount = req.query.row_count;
@@ -206,6 +209,10 @@ exports.byMenuWhere = async (req, res) => {
           }
           if (lang) {
               whereClause.lang = lang;
+          }
+
+          if (group_s) {
+              whereClause.group_s = group_s;
           }
           // Cek jika parameter status_aktif
           if (status) {
@@ -253,6 +260,7 @@ exports.addMenu = async (req, res) => {
     });
 
     const {
+        group_s,
         lang,
         parent,
         order,
@@ -263,6 +271,7 @@ exports.addMenu = async (req, res) => {
     } = req.body;
     try {
         const dataMenu = {
+            group_s: group_s,
             lang: lang,
             parent: parent,
             order: order,
@@ -316,6 +325,7 @@ exports.updateMenu = async (req, res) => {
     // console.log(userLogin);
     const {
         id,
+        group_s,
         lang,
         parent,
         order,
@@ -326,6 +336,7 @@ exports.updateMenu = async (req, res) => {
     } = req.body;
     try {
         const dataMenu = {
+          group_s: group_s,
           lang: lang,
           parent: parent,
           order: order,
