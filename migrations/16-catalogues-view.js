@@ -4,6 +4,7 @@ module.exports = {
       CREATE VIEW catalogues_view AS
       SELECT 
         IF(catalogues.slug IS NULL OR catalogues.slug = '', catalogues.id, catalogues.slug) AS id,
+        catalogues.group_s AS group_s,
         catalogues.lang AS lang,
         catalogues.slug AS slug,
         catalogues.name AS name,
