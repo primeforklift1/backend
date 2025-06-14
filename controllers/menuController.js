@@ -196,7 +196,7 @@ exports.byMenuWhere = async (req, res) => {
   // Menu by where
   exports.byMenuWhereAll = async (req, res) => {
       const log = logger.loggerData({ req });
-      const { id, group_s, lang, status } = req.body;
+      const { id, group_s, lang, status, menu_type } = req.body;
       // Ambil parameter page dan row_count dari query string
       const page = req.query.page;
       const rowCount = req.query.row_count;
@@ -217,6 +217,10 @@ exports.byMenuWhere = async (req, res) => {
           // Cek jika parameter status_aktif
           if (status) {
               whereClause.status = status;
+          }
+          // Cek jika parameter menu_type
+          if (menu_type) {
+              whereClause.menu_type = menu_type;
           }
           const databyMenuWhere = await byMenuWhere(whereClause, page, rowCount);
   
