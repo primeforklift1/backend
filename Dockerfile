@@ -13,7 +13,7 @@ RUN npm install
 # Salin semua file dari direktori saat ini ke direktori app pada image
 COPY . .
 
-RUN chmod -R 777 /usr/src/app/uploads
+RUN mkdir -p /usr/src/app/uploads && chmod -R 777 /usr/src/app/uploads
 
 # Expose port 5000
 EXPOSE 5000
