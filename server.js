@@ -215,6 +215,7 @@ const productController = require("./controllers/cataloguesController");
 const serviceController = require("./controllers/serviceController");
 const articleController = require("./controllers/articleController");
 const messageController = require("./controllers/messageController");
+const promosiController = require("./controllers/promosiController");
 
 app.get("/", limiter, (req, res) => {
   const log = logger.loggerData({ req });
@@ -713,6 +714,38 @@ app.delete(
   limiter,
   authenticateToken("Admin Sistem"),
   messageController.deleteMessage
+);
+
+// API Promosi =================================================
+app.get(
+  "/api/promosi",
+  promosiController.promosi
+);
+app.get(
+  "/api/promosi/:id",
+  promosiController.byPromosi
+);
+app.post(
+  "/api/promosi/where",
+  promosiController.byPromosiWhere
+);
+app.post(
+  "/admin/promosi",
+  limiter,
+  authenticateToken("Admin Sistem"),
+  promosiController.addPromosi
+);
+app.put(
+  "/admin/promosi",
+  limiter,
+  authenticateToken("Admin Sistem"),
+  promosiController.updatePromosi
+);
+app.delete(
+  "/admin/promosi/:id",
+  limiter,
+  authenticateToken("Admin Sistem"),
+  promosiController.deletePromosi
 );
 
 
