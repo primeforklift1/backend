@@ -558,6 +558,19 @@ app.delete(
 
 // API Product ===================================================
 app.get(
+  "/api/product-ori",
+  productController.cataloguesOri
+);
+
+app.get(
+  "/api/product-ori/:id",
+  productController.byCataloguesOri
+);
+app.post(
+  "/api/product-ori/where",
+  productController.byCataloguesWhereOri
+);
+app.get(
   "/api/product",
   productController.catalogues
 );
@@ -624,6 +637,19 @@ app.delete(
 );
 
 // API Blog ===================================================
+app.get(
+  "/api/blog-ori",
+  articleController.articleOri
+);
+
+app.get(
+  "/api/blog-ori/:id",
+  articleController.byArticleOri
+);
+app.post(
+  "/api/blog-ori/where",
+  articleController.byArticleWhereOri
+);
 app.get(
   "/api/blog",
   articleController.article

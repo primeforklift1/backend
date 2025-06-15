@@ -23,7 +23,7 @@ const Client = sequelizePrime.define(
       allowNull: true,
     },
     image: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     link: {

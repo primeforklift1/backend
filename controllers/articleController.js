@@ -5,6 +5,9 @@ require("dotenv").config();
 const logger = require("../config/logger");
 
 const {
+  articleOri,
+  byArticleOri,
+  byArticleWhereOri,
   addArticle,
   updateArticle,
   deleteArticle,
@@ -22,6 +25,148 @@ const response500 = {
 const response400 = {
   status: "Error",
   message: "Bad Request!",
+};
+
+exports.articleOri = async (req, res) => {
+  const log = logger.loggerData({ req });
+
+  try {
+    // Ambil parameter page dan row_count dari query string
+    const page = req.query.page;
+    const rowCount = req.query.row_count;
+
+    const dataArticle = await articleOri(page, rowCount);
+
+    const response = {
+      statusCode: dataArticle.statusCode,
+      status: dataArticle.status,
+      message: dataArticle.message,
+      transactioId: log.TransactionID,
+      totalData: dataArticle.totalData,
+      data: dataArticle.data,
+    };
+    logger.loggerData({
+      timeStart: log.TimeStamp,
+      req,
+      result: response,
+      flag: "STOP",
+      message: response.message,
+    });
+    res.status(dataArticle.statusCode).json(response);
+  } catch (error) {
+    // console.log(error);
+    logger.loggerData({
+      timeStart: log.TimeStamp,
+      req,
+      result: response500,
+      flag: "ERROR",
+      message: error.message,
+    });
+    response500.transactioId = log.TransactionID;
+    res.status(500).json(response500);
+  }
+};
+
+// article by id
+exports.byArticleOri = async (req, res) => {
+  const log = logger.loggerData({ req });
+  const id = req.params.id;
+  if (id) {
+    try {
+      const dataArticle = await byArticleOri(id);
+
+      const response = {
+        statusCode: dataArticle.statusCode,
+        status: dataArticle.status,
+        message: dataArticle.message,
+        transactionId: log.TransactionID,
+        data: dataArticle.data,
+      };
+      logger.loggerData({
+        timeStart: log.TimeStamp,
+        req,
+        result: response,
+        flag: "STOP",
+        message: response.message,
+      });
+      res.status(dataArticle.statusCode).json(response);
+    } catch (error) {
+      logger.loggerData({
+        timeStart: log.TimeStamp,
+        req,
+        result: response500,
+        flag: "ERROR",
+        message: error.message,
+      });
+      response500.transactioId = log.TransactionID;
+      res.status(500).json(response500);
+    }
+  } else {
+    logger.loggerData({
+      timeStart: log.TimeStamp,
+      req,
+      result: response400,
+      flag: "STOP",
+      message: response400.message,
+    });
+    response400.transactioId = log.TransactionID;
+    res.status(400).json(response400);
+  }
+};
+// article by where
+exports.byArticleWhereOri = async (req, res) => {
+  const log = logger.loggerData({ req });
+  const { id, group_s, lang, status } = req.body;
+  // Ambil parameter page dan row_count dari query string
+  const page = req.query.page;
+  const rowCount = req.query.row_count;
+  try {
+    let whereClause = {};
+    // Cek jika parameter id_pengguna
+    if (id) {
+      whereClause.id = id;
+    }
+
+    // Cek jika parameter lang
+    if (lang) {
+      whereClause.lang = lang;
+    }
+
+    if (group_s) {
+      whereClause.group_s = group_s;
+    }
+    if (status) {
+      whereClause.status = status;
+    }
+    const databyArticleWhere = await byArticleWhereOri(whereClause, page, rowCount);
+
+    const response = {
+      statusCode: databyArticleWhere.statusCode,
+      status: databyArticleWhere.status,
+      message: databyArticleWhere.message,
+      transactionId: log.TransactionID,
+      totalData: databyArticleWhere.totalData,
+      data: databyArticleWhere.data,
+    };
+    logger.loggerData({
+      timeStart: log.TimeStamp,
+      req,
+      result: response,
+      flag: "STOP",
+      message: response.message,
+    });
+    res.status(databyArticleWhere.statusCode).json(response);
+  } catch (error) {
+    logger.loggerData({
+      timeStart: log.TimeStamp,
+      req,
+      result: response500,
+      flag: "ERROR",
+      message: error.message,
+    });
+    response500.transactioId = log.TransactionID;
+    res.status(500).json(response500);
+  }
 };
 
 exports.article = async (req, res) => {

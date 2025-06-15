@@ -37,9 +37,8 @@ const Config = sequelizePrime.define(
       defaultValue: 'text'
     },
     image: {
-      type: Sequelize.STRING(255),
-      allowNull: false,
-      defaultValue: 'text'
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
     icon_class: {
       type: Sequelize.STRING(255),

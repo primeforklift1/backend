@@ -39,7 +39,7 @@ const Article = sequelizePrime.define(
       allowNull: true,
     },
     image: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     status: {
@@ -73,6 +73,124 @@ const Article = sequelizePrime.define(
     timestamps: false,
   }
 );
+
+async function articleOri(page, rowCount) {
+  try {
+    // Inisialisasi pagination
+    let limit = null; // Tanpa batas limit
+    let offset = null; // Tanpa offset
+
+    // Cek apakah page dan rowCount disediakan dan valid
+    if (page && rowCount) {
+      limit = parseInt(rowCount);
+      offset = (page - 1) * limit; // Menghitung offset
+    }
+
+    const allArticles = await Article.findAll({
+      limit: limit, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
+      offset: offset, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
+    });
+    const totalRow = await ArticleView.count();
+
+    if (allArticles != null) {
+      return {
+        statusCode: 200,
+        status: "Success",
+        message: "Data Berhasil Ditemukan!",
+        totalData: totalRow,
+        data: allArticles,
+      };
+    } else {
+      return {
+        statusCode: 404,
+        status: "Not Found",
+        message: "Data Tidak Ditemukan!",
+      };
+    }
+  } catch (error) {
+    console.error(error);
+    return {
+      status: "Error",
+      message: "Terjadi Kesalahan Saat Menampilkan Data Article!",
+      data: error.message,
+    };
+  }
+}
+
+// Fungsi untuk menampilkan Article By id
+async function byArticleOri(id) {
+  try {
+    const articleRaw = await Article.findOne({
+      where: {
+        id: id,
+      },
+    });
+
+    if (articleRaw != null) {
+      return {
+        statusCode: 200,
+        status: "Success",
+        message: "Data Berhasil Ditemukan!",
+        data: articleRaw,
+      };
+    } else {
+      return {
+        statusCode: 404,
+        status: "Not Found",
+        message: "Data Tidak Ditemukan!",
+      };
+    }
+  } catch (error) {
+    console.error(error);
+    return {
+      status: "Error",
+      message: "Terjadi Kesalahan Saat Menampilkan Data Article!",
+      data: error.message,
+    };
+  }
+}
+// Fungsi untuk menampilkan Article By where
+async function byArticleWhereOri(whereClause, page, rowCount) {
+  try {
+    // Inisialisasi pagination
+    let limit = null; // Tanpa batas limit
+    let offset = null; // Tanpa offset
+
+    // Cek apakah page dan rowCount disediakan dan valid
+    if (page && rowCount) {
+      limit = parseInt(rowCount);
+      offset = (page - 1) * limit; // Menghitung offset
+    }
+    const totalData = await Article.findAll({ where: whereClause });
+    const ArticleData = await Article.findAll({
+      where: whereClause,
+      limit: limit, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
+      offset: offset, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
+    });
+    if (ArticleData.length > 0) {
+      return {
+        statusCode: 200,
+        status: "Success",
+        message: "Data Berhasil Ditemukan!",
+        totalData: totalData.length,
+        data: ArticleData,
+      };
+    } else {
+      return {
+        statusCode: 404,
+        status: "Not Found",
+        message: "Data Tidak Ditemukan!",
+      };
+    }
+  } catch (error) {
+    console.error(error);
+    return {
+      status: "Error",
+      message: "Terjadi Kesalahan Saat Menampilkan Data Article!",
+      data: error.message,
+    };
+  }
+}
 
 async function addArticle(dataArticle) {
   try {
@@ -177,6 +295,9 @@ async function deleteArticle(id) {
 }
 
 module.exports = {
+  articleOri,
+  byArticleOri,
+  byArticleWhereOri,
   addArticle,
   updateArticle,
   deleteArticle,
