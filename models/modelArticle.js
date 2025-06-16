@@ -295,6 +295,7 @@ async function deleteArticle(id) {
 }
 
 module.exports = {
+  Article,
   articleOri,
   byArticleOri,
   byArticleWhereOri,

@@ -278,6 +278,7 @@ async function deleteCatalogues(id) {
 }
 
 module.exports = {
+  Catalogues,
   cataloguesOri,
   byCataloguesOri,
   byCataloguesWhereOri,

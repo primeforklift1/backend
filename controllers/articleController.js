@@ -1,10 +1,12 @@
 const jwtLib = require("../config/jwt");
 const crypto = require("crypto");
 require("dotenv").config();
+const { Op } = require("sequelize");
 
 const logger = require("../config/logger");
 
 const {
+  Article,
   articleOri,
   byArticleOri,
   byArticleWhereOri,
@@ -26,6 +28,31 @@ const response400 = {
   status: "Error",
   message: "Bad Request!",
 };
+
+const slugify = (text) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')         // spasi jadi -
+    .replace(/[^\w\-]+/g, '')     // buang karakter aneh
+    .replace(/\-\-+/g, '-');      // hilangkan --
+};
+
+const generateSlug = async (title) => {
+  const baseSlug = slugify(title);
+  let slug = baseSlug;
+  console.log(slug);
+  const exists = await Article.count({ where: { slug:{[Op.like]: `${baseSlug}%`} } });
+  console.log(exists);
+  if (exists < 1) {
+    return slug;
+  }else{
+    slug = `${baseSlug}-${(exists+1)}`;
+    return slug;
+  }
+};
+
 
 exports.articleOri = async (req, res) => {
   const log = logger.loggerData({ req });
@@ -332,11 +359,14 @@ exports.addArticle = async (req, res) => {
     image,
     status,
   } = req.body;
+
+  const validSlug = await generateSlug(title);
+  console.log(validSlug);
   try {
     const dataArticle = {
       group_s:group_s,
       lang:lang,
-      slug: slug,
+      slug: validSlug,
       title: title,
       preface: preface,
       detail: detail,
@@ -399,6 +429,9 @@ exports.updateArticle = async (req, res) => {
     image,
     status,
   } = req.body;
+
+  const validSlug = await generateSlug(title);
+  console.log(validSlug);
   try {
     const dataArticle = {
       group_s:group_s,

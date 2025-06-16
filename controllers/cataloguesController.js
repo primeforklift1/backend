@@ -1,10 +1,12 @@
 const jwtLib = require("../config/jwt");
 const crypto = require("crypto");
 require("dotenv").config();
+const { Op } = require("sequelize");
 
 const logger = require("../config/logger");
 
 const {
+  Catalogues,
   cataloguesOri,
   byCataloguesOri,
   byCataloguesWhereOri,
@@ -26,6 +28,30 @@ const response500 = {
 const response400 = {
   status: "Error",
   message: "Bad Request!",
+};
+
+const slugify = (text) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')         // spasi jadi -
+    .replace(/[^\w\-]+/g, '')     // buang karakter aneh
+    .replace(/\-\-+/g, '-');      // hilangkan --
+};
+
+const generateSlug = async (title) => {
+  const baseSlug = slugify(title);
+  let slug = baseSlug;
+  console.log(slug);
+  const exists = await Catalogues.count({ where: { slug:{[Op.like]: `${baseSlug}%`} } });
+  console.log(exists);
+  if (exists < 1) {
+    return slug;
+  }else{
+    slug = `${baseSlug}-${(exists+1)}`;
+    return slug;
+  }
 };
 
 exports.cataloguesOri = async (req, res) => {
@@ -348,11 +374,14 @@ exports.addCatalogues = async (req, res) => {
     id_category,
     status,
   } = req.body;
+
+  const validSlug = await generateSlug(name);
+  console.log(validSlug);
   try {
     const dataCatalogues = {
       group_s:group_s,
       lang:lang,
-      slug: slug,
+      slug: validSlug,
       name: name,
       id_merk: id_merk,
       description: description,
@@ -417,11 +446,14 @@ exports.updateCatalogues = async (req, res) => {
     id_category,
     status,
   } = req.body;
+
+  const validSlug = await generateSlug(name);
+  console.log(validSlug);
   try {
     const dataCatalogues = {
         group_s:group_s,
         lang:lang,
-        slug: slug,
+        slug: validSlug,
         name: name,
         id_merek: id_merek,
         description: description,
