@@ -700,7 +700,7 @@ app.post(
 app.post(
   "/admin/message",
   limiter,
-  authenticateToken("Admin Sistem"),
+  // authenticateToken("Admin Sistem"),
   messageController.addMessage
 );
 app.put(

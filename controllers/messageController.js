@@ -176,12 +176,12 @@ exports.byMessageWhere = async (req, res) => {
 // add Message
 exports.addMessage = async (req, res) => {
     const log = logger.loggerData({ req });
-    const token = req.headers["authorization"];
-    const validToken = token.split(" ");
-    let userLogin;
-    jwtLib.jwt.verify(validToken[1], jwtLib.secretKey, (err, user) => {
-        userLogin = user.user_id;
-    });
+    // const token = req.headers["authorization"];
+    // const validToken = token.split(" ");
+    // let userLogin;
+    // jwtLib.jwt.verify(validToken[1], jwtLib.secretKey, (err, user) => {
+    //     userLogin = user.user_id;
+    // });
 
     const {
         lang,
@@ -206,7 +206,7 @@ exports.addMessage = async (req, res) => {
             message: message,
             status: status,
             insert_date: new Date(),
-            insert_by: userLogin
+            insert_by: null
         };
         // console.log(dataMessage);
         const dataMessageAdded = await addMessage(dataMessage);
