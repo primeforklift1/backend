@@ -134,6 +134,7 @@ async function byPromosiWhere(whereClause, page, rowCount) {
       where: whereClause,
       limit: limit, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
       offset: offset, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
+      order: [['id', 'DESC']],
     });
     if (PromosiData.length > 0) {
       return {

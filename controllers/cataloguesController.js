@@ -292,7 +292,7 @@ exports.byCatalogues = async (req, res) => {
 // catalogues by where
 exports.byCataloguesWhere = async (req, res) => {
   const log = logger.loggerData({ req });
-  const { id,group_s,lang,id_merek,id_category, status } = req.body;
+  const { id,group_s,lang,id_merek,id_category, status, name } = req.body;
   // Ambil parameter page dan row_count dari query string
   const page = req.query.page;
   const rowCount = req.query.row_count;
@@ -321,6 +321,9 @@ exports.byCataloguesWhere = async (req, res) => {
     if (status) {
       whereClause.status = status;
     }
+
+    if (name) whereClause.name = { [Op.like]: `%${name}%` };
+    
     const databyCataloguesWhere = await byCataloguesWhere(whereClause, page, rowCount);
 
     const response = {
