@@ -1,8 +1,8 @@
 const { sequelizePrime } = require("../config/db");
 const { Sequelize, DataTypes } = require("sequelize");
 
-const Article = sequelizePrime.define(
-  "Article",
+const Promosi = sequelizePrime.define(
+  "Promosi",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -10,71 +10,39 @@ const Article = sequelizePrime.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    group_s: {
-      type: Sequelize.INTEGER,
-      allowNull: true
-    },
     lang: {
       type: Sequelize.STRING(50),
       allowNull: true
     },
-    slug: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    },
     title: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
-    },
-    preface: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
-    },
-    detail: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    keyword: {
-      type: DataTypes.STRING(75),
-      allowNull: true,
+      type: DataTypes.STRING(50),
+      allowNull: false,
     },
     image: {
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    start_date: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    end_date: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
     status: {
-      type: DataTypes.TINYINT,
+      type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 1,
     },
-    insert_user: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    insert_date: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    update_user: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    update_date: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    release_date: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
   },
   {
-    tableName: "article",
+    tableName: "promosi",
     timestamps: false,
   }
 );
 
-async function articleOri(page, rowCount) {
+async function promosi(page, rowCount) {
   try {
     // Inisialisasi pagination
     let limit = null; // Tanpa batas limit
@@ -86,19 +54,19 @@ async function articleOri(page, rowCount) {
       offset = (page - 1) * limit; // Menghitung offset
     }
 
-    const allArticles = await Article.findAll({
+    const allPromosi = await Promosi.findAll({
       limit: limit, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
       offset: offset, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
     });
-    const totalRow = await ArticleView.count();
+    const totalRow = await Promosi.count();
 
-    if (allArticles != null) {
+    if (allPromosi != null) {
       return {
         statusCode: 200,
         status: "Success",
         message: "Data Berhasil Ditemukan!",
         totalData: totalRow,
-        data: allArticles,
+        data: allPromosi,
       };
     } else {
       return {
@@ -111,27 +79,27 @@ async function articleOri(page, rowCount) {
     console.error(error);
     return {
       status: "Error",
-      message: "Terjadi Kesalahan Saat Menampilkan Data Article!",
+      message: "Terjadi Kesalahan Saat Menampilkan Data Promosi!",
       data: error.message,
     };
   }
 }
 
-// Fungsi untuk menampilkan Article By id
-async function byArticleOri(id) {
+// Fungsi untuk menampilkan Promosi By id
+async function byPromosi(id) {
   try {
-    const articleRaw = await Article.findOne({
+    const promosiRaw = await Promosi.findOne({
       where: {
         id: id,
       },
     });
 
-    if (articleRaw != null) {
+    if (promosiRaw != null) {
       return {
         statusCode: 200,
         status: "Success",
         message: "Data Berhasil Ditemukan!",
-        data: articleRaw,
+        data: promosiRaw,
       };
     } else {
       return {
@@ -144,13 +112,13 @@ async function byArticleOri(id) {
     console.error(error);
     return {
       status: "Error",
-      message: "Terjadi Kesalahan Saat Menampilkan Data Article!",
+      message: "Terjadi Kesalahan Saat Menampilkan Data Promosi!",
       data: error.message,
     };
   }
 }
-// Fungsi untuk menampilkan Article By where
-async function byArticleWhereOri(whereClause, page, rowCount) {
+// Fungsi untuk menampilkan Promosi By where
+async function byPromosiWhere(whereClause, page, rowCount) {
   try {
     // Inisialisasi pagination
     let limit = null; // Tanpa batas limit
@@ -161,19 +129,20 @@ async function byArticleWhereOri(whereClause, page, rowCount) {
       limit = parseInt(rowCount);
       offset = (page - 1) * limit; // Menghitung offset
     }
-    const totalData = await Article.findAll({ where: whereClause });
-    const ArticleData = await Article.findAll({
+    const totalData = await Promosi.findAll({ where: whereClause });
+    const PromosiData = await Promosi.findAll({
       where: whereClause,
       limit: limit, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
       offset: offset, // Akan menjadi null jika page atau rowCount tidak valid atau tidak disediakan
+      order: [['id', 'DESC']],
     });
-    if (ArticleData.length > 0) {
+    if (PromosiData.length > 0) {
       return {
         statusCode: 200,
         status: "Success",
         message: "Data Berhasil Ditemukan!",
         totalData: totalData.length,
-        data: ArticleData,
+        data: PromosiData,
       };
     } else {
       return {
@@ -186,29 +155,29 @@ async function byArticleWhereOri(whereClause, page, rowCount) {
     console.error(error);
     return {
       status: "Error",
-      message: "Terjadi Kesalahan Saat Menampilkan Data Article!",
+      message: "Terjadi Kesalahan Saat Menampilkan Data Promosi!",
       data: error.message,
     };
   }
 }
 
-async function addArticle(dataArticle) {
+async function addPromosi(dataPromosi) {
   try {
-    // Gunakan metode create untuk menambah data ke dalam tabel Article
-    const newArticle = await Article.create(dataArticle);
+    // Gunakan metode create untuk menambah data ke dalam tabel Promosi
+    const newPromosi = await Promosi.create(dataPromosi);
 
-    if (newArticle) {
+    if (newPromosi) {
       return {
         statusCode: 201,
         status: "Success",
-        message: "Article berhasil ditambahkan!",
-        data: newArticle,
+        message: "Promosi berhasil ditambahkan!",
+        data: newPromosi,
       };
     } else {
       return {
         statusCode: 400,
         status: "Bad Request",
-        message: "Gagal menambahkan Article.",
+        message: "Gagal menambahkan Promosi.",
       };
     }
   } catch (error) {
@@ -216,39 +185,39 @@ async function addArticle(dataArticle) {
     return {
       statusCode: 500,
       status: "Error",
-      message: "Terjadi kesalahan saat menambahkan Article.",
+      message: "Terjadi kesalahan saat menambahkan Promosi.",
       data: error.message,
     };
   }
 }
-// Fungsi untuk mengubah Article
-async function updateArticle(id, dataArticle) {
+// Fungsi untuk mengubah Promosi
+async function updatePromosi(id, dataPromosi) {
   try {
-    // Cek apakah Article dengan id yang diberikan ada dalam database
-    const existingDataArticle = await Article.findByPk(id);
-    if (!existingDataArticle) {
+    // Cek apakah Promosi dengan id yang diberikan ada dalam database
+    const existingDataPromosi = await Promosi.findByPk(id);
+    if (!existingDataPromosi) {
       return {
         statusCode: 404,
         status: "Not Found",
-        message: "Data Article tidak ditemukan.",
+        message: "Data Promosi tidak ditemukan.",
       };
     }
 
-    // Gunakan metode create untuk mengubah data ke dalam tabel Article
-    const updatedArticle = await existingDataArticle.update(dataArticle);
+    // Gunakan metode create untuk mengubah data ke dalam tabel Promosi
+    const updatedPromosi = await existingDataPromosi.update(dataPromosi);
 
-    if (updatedArticle) {
+    if (updatedPromosi) {
       return {
         statusCode: 200,
         status: "Success",
-        message: "Article berhasil diperbaharui!",
-        data: updatedArticle,
+        message: "Promosi berhasil diperbaharui!",
+        data: updatedPromosi,
       };
     } else {
       return {
         statusCode: 400,
         status: "Bad Request",
-        message: "Gagal memperbaharui Article.",
+        message: "Gagal memperbaharui Promosi.",
       };
     }
   } catch (error) {
@@ -256,32 +225,32 @@ async function updateArticle(id, dataArticle) {
     return {
       statusCode: 500,
       status: "Error",
-      message: "Terjadi kesalahan saat memperbaharui Article.",
+      message: "Terjadi kesalahan saat memperbaharui Promosi.",
       data: error.message,
     };
   }
 }
 
-// Fungsi untuk menghapus Article
-async function deleteArticle(id) {
+// Fungsi untuk menghapus Promosi
+async function deletePromosi(id) {
   try {
-    // Cek apakah Article dengan id yang diberikan ada dalam database
-    const existingArticle = await Article.findByPk(id);
-    if (!existingArticle) {
+    // Cek apakah Promosi dengan id yang diberikan ada dalam database
+    const existingPromosi = await Promosi.findByPk(id);
+    if (!existingPromosi) {
       return {
         statusCode: 404,
         status: "Not Found",
-        message: "Data Article tidak ditemukan.",
+        message: "Data Promosi tidak ditemukan.",
       };
     }
 
-    // Gunakan metode destroy untuk menghapus data dari tabel Article
-    await existingArticle.destroy();
+    // Gunakan metode destroy untuk menghapus data dari tabel Promosi
+    await existingPromosi.destroy();
 
     return {
       statusCode: 200,
       status: "Success",
-      message: "Article berhasil dihapus!",
+      message: "Promosi berhasil dihapus!",
     };
   } catch (error) {
     console.error(error);
@@ -295,11 +264,10 @@ async function deleteArticle(id) {
 }
 
 module.exports = {
-  Article,
-  articleOri,
-  byArticleOri,
-  byArticleWhereOri,
-  addArticle,
-  updateArticle,
-  deleteArticle,
+  promosi,
+  byPromosi,
+  byPromosiWhere,
+  addPromosi,
+  updatePromosi,
+  deletePromosi,
 };

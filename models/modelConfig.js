@@ -10,6 +10,10 @@ const Config = sequelizePrime.define(
       primaryKey: true,
       autoIncrement: true,
     },
+    group_s: {
+      type: Sequelize.INTEGER,
+      allowNull: true
+    },
     lang: {
       type: Sequelize.STRING(50),
       allowNull: true
@@ -33,9 +37,8 @@ const Config = sequelizePrime.define(
       defaultValue: 'text'
     },
     image: {
-      type: Sequelize.STRING(255),
-      allowNull: false,
-      defaultValue: 'text'
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
     icon_class: {
       type: Sequelize.STRING(255),

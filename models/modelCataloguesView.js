@@ -8,6 +8,7 @@ const CataloguesView = sequelizePrime.define(
       type: DataTypes.STRING,
       primaryKey: true,
     },
+    group_s: DataTypes.INTEGER,
     lang: DataTypes.STRING,
     slug: DataTypes.STRING,
     name: DataTypes.STRING,

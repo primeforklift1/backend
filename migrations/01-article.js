@@ -7,6 +7,10 @@ module.exports = {
         primaryKey: true,
         autoIncrement: true
       },
+      group_s: {
+        type: Sequelize.INTEGER,
+        allowNull: true
+      },
       lang: {
         type: Sequelize.STRING(50),
         allowNull: true
@@ -32,8 +36,8 @@ module.exports = {
         allowNull: true
       },
       image: {
-        type: Sequelize.STRING(255),
-        allowNull: true
+        type: Sequelize.TEXT,
+        allowNull: true,
       },
       status: {
         type: Sequelize.TINYINT,

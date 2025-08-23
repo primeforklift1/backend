@@ -16,8 +16,8 @@ module.exports = {
         allowNull: true
       },
       flag_image: {
-        type: Sequelize.STRING(255),
-        allowNull: true
+        type: Sequelize.TEXT,
+        allowNull: true,
       },
       status: {
         type: Sequelize.TINYINT,

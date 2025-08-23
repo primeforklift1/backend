@@ -1,10 +1,15 @@
 const jwtLib = require("../config/jwt");
 const crypto = require("crypto");
 require("dotenv").config();
+const { Op } = require("sequelize");
 
 const logger = require("../config/logger");
 
 const {
+  Article,
+  articleOri,
+  byArticleOri,
+  byArticleWhereOri,
   addArticle,
   updateArticle,
   deleteArticle,
@@ -22,6 +27,173 @@ const response500 = {
 const response400 = {
   status: "Error",
   message: "Bad Request!",
+};
+
+const slugify = (text) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')         // spasi jadi -
+    .replace(/[^\w\-]+/g, '')     // buang karakter aneh
+    .replace(/\-\-+/g, '-');      // hilangkan --
+};
+
+const generateSlug = async (title) => {
+  const baseSlug = slugify(title);
+  let slug = baseSlug;
+  console.log(slug);
+  const exists = await Article.count({ where: { slug:{[Op.like]: `${baseSlug}%`} } });
+  console.log(exists);
+  if (exists < 1) {
+    return slug;
+  }else{
+    slug = `${baseSlug}-${(exists+1)}`;
+    return slug;
+  }
+};
+
+
+exports.articleOri = async (req, res) => {
+  const log = logger.loggerData({ req });
+
+  try {
+    // Ambil parameter page dan row_count dari query string
+    const page = req.query.page;
+    const rowCount = req.query.row_count;
+
+    const dataArticle = await articleOri(page, rowCount);
+
+    const response = {
+      statusCode: dataArticle.statusCode,
+      status: dataArticle.status,
+      message: dataArticle.message,
+      transactioId: log.TransactionID,
+      totalData: dataArticle.totalData,
+      data: dataArticle.data,
+    };
+    logger.loggerData({
+      timeStart: log.TimeStamp,
+      req,
+      result: response,
+      flag: "STOP",
+      message: response.message,
+    });
+    res.status(dataArticle.statusCode).json(response);
+  } catch (error) {
+    // console.log(error);
+    logger.loggerData({
+      timeStart: log.TimeStamp,
+      req,
+      result: response500,
+      flag: "ERROR",
+      message: error.message,
+    });
+    response500.transactioId = log.TransactionID;
+    res.status(500).json(response500);
+  }
+};
+
+// article by id
+exports.byArticleOri = async (req, res) => {
+  const log = logger.loggerData({ req });
+  const id = req.params.id;
+  if (id) {
+    try {
+      const dataArticle = await byArticleOri(id);
+
+      const response = {
+        statusCode: dataArticle.statusCode,
+        status: dataArticle.status,
+        message: dataArticle.message,
+        transactionId: log.TransactionID,
+        data: dataArticle.data,
+      };
+      logger.loggerData({
+        timeStart: log.TimeStamp,
+        req,
+        result: response,
+        flag: "STOP",
+        message: response.message,
+      });
+      res.status(dataArticle.statusCode).json(response);
+    } catch (error) {
+      logger.loggerData({
+        timeStart: log.TimeStamp,
+        req,
+        result: response500,
+        flag: "ERROR",
+        message: error.message,
+      });
+      response500.transactioId = log.TransactionID;
+      res.status(500).json(response500);
+    }
+  } else {
+    logger.loggerData({
+      timeStart: log.TimeStamp,
+      req,
+      result: response400,
+      flag: "STOP",
+      message: response400.message,
+    });
+    response400.transactioId = log.TransactionID;
+    res.status(400).json(response400);
+  }
+};
+// article by where
+exports.byArticleWhereOri = async (req, res) => {
+  const log = logger.loggerData({ req });
+  const { id, group_s, lang, status } = req.body;
+  // Ambil parameter page dan row_count dari query string
+  const page = req.query.page;
+  const rowCount = req.query.row_count;
+  try {
+    let whereClause = {};
+    // Cek jika parameter id_pengguna
+    if (id) {
+      whereClause.id = id;
+    }
+
+    // Cek jika parameter lang
+    if (lang) {
+      whereClause.lang = lang;
+    }
+
+    if (group_s) {
+      whereClause.group_s = group_s;
+    }
+    if (status) {
+      whereClause.status = status;
+    }
+    const databyArticleWhere = await byArticleWhereOri(whereClause, page, rowCount);
+
+    const response = {
+      statusCode: databyArticleWhere.statusCode,
+      status: databyArticleWhere.status,
+      message: databyArticleWhere.message,
+      transactionId: log.TransactionID,
+      totalData: databyArticleWhere.totalData,
+      data: databyArticleWhere.data,
+    };
+    logger.loggerData({
+      timeStart: log.TimeStamp,
+      req,
+      result: response,
+      flag: "STOP",
+      message: response.message,
+    });
+    res.status(databyArticleWhere.statusCode).json(response);
+  } catch (error) {
+    logger.loggerData({
+      timeStart: log.TimeStamp,
+      req,
+      result: response500,
+      flag: "ERROR",
+      message: error.message,
+    });
+    response500.transactioId = log.TransactionID;
+    res.status(500).json(response500);
+  }
 };
 
 exports.article = async (req, res) => {
@@ -113,7 +285,7 @@ exports.byArticle = async (req, res) => {
 // article by where
 exports.byArticleWhere = async (req, res) => {
   const log = logger.loggerData({ req });
-  const { id,lang, status } = req.body;
+  const { id, group_s, lang, status } = req.body;
   // Ambil parameter page dan row_count dari query string
   const page = req.query.page;
   const rowCount = req.query.row_count;
@@ -127,6 +299,10 @@ exports.byArticleWhere = async (req, res) => {
     // Cek jika parameter lang
     if (lang) {
       whereClause.lang = lang;
+    }
+
+    if (group_s) {
+      whereClause.group_s = group_s;
     }
     if (status) {
       whereClause.status = status;
@@ -173,6 +349,7 @@ exports.addArticle = async (req, res) => {
   });
 
   const {
+    group_s,
     lang,
     slug,
     title,
@@ -182,10 +359,14 @@ exports.addArticle = async (req, res) => {
     image,
     status,
   } = req.body;
+
+  const validSlug = await generateSlug(title);
+  console.log(validSlug);
   try {
     const dataArticle = {
+      group_s:group_s,
       lang:lang,
-      slug: slug,
+      slug: validSlug,
       title: title,
       preface: preface,
       detail: detail,
@@ -238,6 +419,7 @@ exports.updateArticle = async (req, res) => {
   // console.log(userLogin);
   const {
     id,
+    group_s,
     lang,
     slug,
     title,
@@ -247,8 +429,12 @@ exports.updateArticle = async (req, res) => {
     image,
     status,
   } = req.body;
+
+  const validSlug = await generateSlug(title);
+  console.log(validSlug);
   try {
     const dataArticle = {
+      group_s:group_s,
       lang:lang,
       slug: slug,
       title: title,

@@ -19,8 +19,8 @@ const Lang = sequelizePrime.define(
       allowNull: true
     },
     flag_image: {
-      type: Sequelize.STRING(255),
-      allowNull: true
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
     status: {
       type: Sequelize.TINYINT,

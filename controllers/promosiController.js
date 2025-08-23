@@ -5,13 +5,13 @@ require("dotenv").config();
 const logger = require("../config/logger");
 
 const {
-    category,
-    byCategory,
-    byCategoryWhere,
-    addCategory,
-    updateCategory,
-    deleteCategory,
-} = require("../models/modelCategory");
+    promosi,
+    byPromosi,
+    byPromosiWhere,
+    addPromosi,
+    updatePromosi,
+    deletePromosi,
+} = require("../models/modelPromosi");
 
 const response500 = {
     status: "Error",
@@ -23,7 +23,7 @@ const response400 = {
 };
 
 
-exports.category = async (req, res) => {
+exports.promosi = async (req, res) => {
     const log = logger.loggerData({ req });
 
     try {
@@ -31,15 +31,15 @@ exports.category = async (req, res) => {
         const page = req.query.page;
         const rowCount = req.query.row_count;
 
-        const dataCategory = await category(page, rowCount);
+        const dataPromosi = await promosi(page, rowCount);
 
         const response = {
-            statusCode: dataCategory.statusCode,
-            status: dataCategory.status,
-            message: dataCategory.message,
+            statusCode: dataPromosi.statusCode,
+            status: dataPromosi.status,
+            message: dataPromosi.message,
             transactioId: log.TransactionID,
-            totalData: dataCategory.totalData,
-            data: dataCategory.data,
+            totalData: dataPromosi.totalData,
+            data: dataPromosi.data,
         };
         logger.loggerData({
             timeStart: log.TimeStamp,
@@ -48,7 +48,7 @@ exports.category = async (req, res) => {
             flag: "STOP",
             message: response.message,
         });
-        res.status(dataCategory.statusCode).json(response);
+        res.status(dataPromosi.statusCode).json(response);
     } catch (error) {
         // console.log(error);
         logger.loggerData({
@@ -63,20 +63,20 @@ exports.category = async (req, res) => {
     }
 };
 
-// category by id
-exports.byCategory = async (req, res) => {
+// promosi by id
+exports.byPromosi = async (req, res) => {
     const log = logger.loggerData({ req });
     const id = req.params.id;
     if (id) {
         try {
-            const dataCategory = await byCategory(id);
+            const dataPromosi = await byPromosi(id);
 
             const response = {
-                statusCode: dataCategory.statusCode,
-                status: dataCategory.status,
-                message: dataCategory.message,
+                statusCode: dataPromosi.statusCode,
+                status: dataPromosi.status,
+                message: dataPromosi.message,
                 transactionId: log.TransactionID,
-                data: dataCategory.data,
+                data: dataPromosi.data,
             };
             logger.loggerData({
                 timeStart: log.TimeStamp,
@@ -85,7 +85,7 @@ exports.byCategory = async (req, res) => {
                 flag: "STOP",
                 message: response.message,
             });
-            res.status(dataCategory.statusCode).json(response);
+            res.status(dataPromosi.statusCode).json(response);
         } catch (error) {
             logger.loggerData({
                 timeStart: log.TimeStamp,
@@ -109,100 +109,44 @@ exports.byCategory = async (req, res) => {
         res.status(400).json(response400);
     }
 };
-// Category by where
-exports.byCategoryWhere = async (req, res) => {
+// Promosi by where
+exports.byPromosiWhere = async (req, res) => {
     const log = logger.loggerData({ req });
-    const { id,group_s, lang, status } = req.body;
+    const { id, lang, status, start_date, end_date } = req.body;
     // Ambil parameter page dan row_count dari query string
     const page = req.query.page;
     const rowCount = req.query.row_count;
     try {
-      let whereClause = {};
-      // Cek jika parameter id_pengguna
-      if (id) {
-        whereClause.id = id;
-      }
-      // Cek jika parameter lang
-      if (lang) {
-        whereClause.lang = lang;
-      }
+        let whereClause = {};
+        //   whereClause.lang = 'id';
+        // Cek jika parameter id
+        if (id) {
+            whereClause.id = id;
+        }
+        if (lang) {
+            whereClause.lang = lang;
+        }
 
-      if (group_s) {
-        whereClause.group_s = group_s;
-      }
-  
-      if (status) {
-        whereClause.status = status;
-      }
-      const databyCategoryWhere = await byCategoryWhere(whereClause, page, rowCount);
-  
-      const response = {
-        statusCode: databyCategoryWhere.statusCode,
-        status: databyCategoryWhere.status,
-        message: databyCategoryWhere.message,
-        transactionId: log.TransactionID,
-        totalData: databyCategoryWhere.totalData,
-        data: databyCategoryWhere.data,
-      };
-      logger.loggerData({
-        timeStart: log.TimeStamp,
-        req,
-        result: response,
-        flag: "STOP",
-        message: response.message,
-      });
-      res.status(databyCategoryWhere.statusCode).json(response);
-    } catch (error) {
-      logger.loggerData({
-        timeStart: log.TimeStamp,
-        req,
-        result: response500,
-        flag: "ERROR",
-        message: error.message,
-      });
-      response500.transactioId = log.TransactionID;
-      res.status(500).json(response500);
-    }
-  };
-
-// add Category
-exports.addCategory = async (req, res) => {
-    const log = logger.loggerData({ req });
-    const token = req.headers["authorization"];
-    const validToken = token.split(" ");
-    let userLogin;
-    jwtLib.jwt.verify(validToken[1], jwtLib.secretKey, (err, user) => {
-        userLogin = user.user_id;
-    });
-
-    const {
-        group_s,
-        lang,
-        parent_id,
-        name,
-        status,
-    } = req.body;
-    try {
-        const dataCategory = {
-            group_s: group_s,
-            lang: lang,
-            parent_id: parent_id,
-            name: name,
-            status: status,
-            insert_date: new Date(),
-            insert_by: userLogin
-        };
-        // console.log(dataCategory);
-        const dataCategoryAdded = await addCategory(dataCategory);
+        // Cek jika parameter status_aktif
+        if (status) {
+            whereClause.status = status;
+        }
+        if (start_date) {
+            whereClause.start_date = start_date;
+        }
+        if (end_date) {
+            whereClause.end_date = end_date;
+        }
+        const databyPromosiWhere = await byPromosiWhere(whereClause, page, rowCount);
 
         const response = {
-            statusCode: dataCategoryAdded.statusCode,
-            status: dataCategoryAdded.status,
-            message: dataCategoryAdded.message,
-            transactioId: log.TransactionID,
-            data: dataCategoryAdded.data,
+            statusCode: databyPromosiWhere.statusCode,
+            status: databyPromosiWhere.status,
+            message: databyPromosiWhere.message,
+            transactionId: log.TransactionID,
+            totalData: databyPromosiWhere.totalData,
+            data: databyPromosiWhere.data,
         };
-
         logger.loggerData({
             timeStart: log.TimeStamp,
             req,
@@ -210,7 +154,7 @@ exports.addCategory = async (req, res) => {
             flag: "STOP",
             message: response.message,
         });
-        res.status(dataCategoryAdded.statusCode).json(response);
+        res.status(databyPromosiWhere.statusCode).json(response);
     } catch (error) {
         logger.loggerData({
             timeStart: log.TimeStamp,
@@ -223,8 +167,67 @@ exports.addCategory = async (req, res) => {
         res.status(500).json(response500);
     }
 };
-// update Category
-exports.updateCategory = async (req, res) => {
+
+// add Promosi
+exports.addPromosi = async (req, res) => {
+    const log = logger.loggerData({ req });
+    const token = req.headers["authorization"];
+    const validToken = token.split(" ");
+    let userLogin;
+    jwtLib.jwt.verify(validToken[1], jwtLib.secretKey, (err, user) => {
+        userLogin = user.user_id;
+    });
+
+    const {
+        lang,
+        title,
+        image,
+        start_date,
+        end_date,
+        status,
+    } = req.body;
+    try {
+        const dataPromosi = {
+            lang: lang,
+            title: title,
+            image: image,
+            start_date: start_date,
+            end_date: end_date,
+            status: status
+        };
+        // console.log(dataPromosi);
+        const dataPromosiAdded = await addPromosi(dataPromosi);
+
+        const response = {
+            statusCode: dataPromosiAdded.statusCode,
+            status: dataPromosiAdded.status,
+            message: dataPromosiAdded.message,
+            transactioId: log.TransactionID,
+            data: dataPromosiAdded.data,
+        };
+
+        logger.loggerData({
+            timeStart: log.TimeStamp,
+            req,
+            result: response,
+            flag: "STOP",
+            message: response.message,
+        });
+        res.status(dataPromosiAdded.statusCode).json(response);
+    } catch (error) {
+        logger.loggerData({
+            timeStart: log.TimeStamp,
+            req,
+            result: response500,
+            flag: "ERROR",
+            message: error.message,
+        });
+        response500.transactioId = log.TransactionID;
+        res.status(500).json(response500);
+    }
+};
+// update Promosi
+exports.updatePromosi = async (req, res) => {
     const log = logger.loggerData({ req });
     const token = req.headers["authorization"];
     const validToken = token.split(" ");
@@ -235,29 +238,31 @@ exports.updateCategory = async (req, res) => {
     // console.log(userLogin);
     const {
         id,
-        group_s,
         lang,
-        parent_id,
-        name,
+        title,
+        image,
+        start_date,
+        end_date,
         status,
     } = req.body;
     try {
-        const dataCategory = {
-            group_s: group_s,
-            lang: lang,
-            parent_id: parent_id,
-            name: name,
+        const dataPromosi = {
+            lang:lang,
+            title: title,
+            image: image,
+            start_date: start_date,
+            end_date: end_date,
             status: status,
         };
-        // console.log(dataCategory);
-        const dataCategoryUpdated = await updateCategory(id, dataCategory);
+        // console.log(dataPromosi);
+        const dataPromosiUpdated = await updatePromosi(id, dataPromosi);
 
         const response = {
-            statusCode: dataCategoryUpdated.statusCode,
-            status: dataCategoryUpdated.status,
-            message: dataCategoryUpdated.message,
+            statusCode: dataPromosiUpdated.statusCode,
+            status: dataPromosiUpdated.status,
+            message: dataPromosiUpdated.message,
             transactioId: log.TransactionID,
-            data: dataCategoryUpdated.data,
+            data: dataPromosiUpdated.data,
         };
 
         logger.loggerData({
@@ -267,7 +272,7 @@ exports.updateCategory = async (req, res) => {
             flag: "STOP",
             message: response.message,
         });
-        res.status(dataCategoryUpdated.statusCode).json(response);
+        res.status(dataPromosiUpdated.statusCode).json(response);
     } catch (error) {
         logger.loggerData({
             timeStart: log.TimeStamp,
@@ -281,20 +286,20 @@ exports.updateCategory = async (req, res) => {
     }
 };
 
-//delete Category by id Category
-exports.deleteCategory = async (req, res) => {
+//delete Promosi by id Promosi
+exports.deletePromosi = async (req, res) => {
     const log = logger.loggerData({ req });
     const id = req.params.id;
     if (id) {
         try {
-            const dataCategoryDeleted = await deleteCategory(id);
+            const dataPromosiDeleted = await deletePromosi(id);
 
             const response = {
-                statusCode: dataCategoryDeleted.statusCode,
-                status: dataCategoryDeleted.status,
-                message: dataCategoryDeleted.message,
+                statusCode: dataPromosiDeleted.statusCode,
+                status: dataPromosiDeleted.status,
+                message: dataPromosiDeleted.message,
                 transactioId: log.TransactionID,
-                data: dataCategoryDeleted.data,
+                data: dataPromosiDeleted.data,
             };
 
             logger.loggerData({
@@ -304,7 +309,7 @@ exports.deleteCategory = async (req, res) => {
                 flag: "STOP",
                 message: response.message,
             });
-            res.status(dataCategoryDeleted.statusCode).json(response);
+            res.status(dataPromosiDeleted.statusCode).json(response);
         } catch (error) {
             logger.loggerData({
                 timeStart: log.TimeStamp,

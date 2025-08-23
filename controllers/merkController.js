@@ -112,7 +112,7 @@ exports.byMerk = async (req, res) => {
 // Merk by where
 exports.byMerkWhere = async (req, res) => {
     const log = logger.loggerData({ req });
-    const { id, lang, status } = req.body;
+    const { id, group_s, lang, status } = req.body;
     // Ambil parameter page dan row_count dari query string
     const page = req.query.page;
     const rowCount = req.query.row_count;
@@ -125,6 +125,10 @@ exports.byMerkWhere = async (req, res) => {
         }
         if (lang) {
             whereClause.lang = lang;
+        }
+
+        if (group_s) {
+            whereClause.group_s = group_s;
         }
         // Cek jika parameter status_aktif
         if (status) {
@@ -172,12 +176,18 @@ exports.addMerk = async (req, res) => {
     });
 
     const {
+        group_s,
+        lang,
         nama,
+        image,
         status,
     } = req.body;
     try {
         const dataMerk = {
+            group_s: group_s,
+            lang: lang,
             nama: nama,
+            image: image,
             status: status,
             insert_date: new Date(),
             insert_by: userLogin
@@ -225,12 +235,18 @@ exports.updateMerk = async (req, res) => {
     // console.log(userLogin);
     const {
         id,
+        group_s,
+        lang,
         nama,
+        image,
         status,
     } = req.body;
     try {
         const dataMerk = {
+            group_s: group_s,
+            lang: lang,
             nama: nama,
+            image: image,
             status: status,
         };
         // console.log(dataMerk);

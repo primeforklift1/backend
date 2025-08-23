@@ -1,10 +1,15 @@
 const jwtLib = require("../config/jwt");
 const crypto = require("crypto");
 require("dotenv").config();
+const { Op } = require("sequelize");
 
 const logger = require("../config/logger");
 
 const {
+  Catalogues,
+  cataloguesOri,
+  byCataloguesOri,
+  byCataloguesWhereOri,
   addCatalogues,
   updateCatalogues,
   deleteCatalogues,
@@ -23,6 +28,179 @@ const response500 = {
 const response400 = {
   status: "Error",
   message: "Bad Request!",
+};
+
+const slugify = (text) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')         // spasi jadi -
+    .replace(/[^\w\-]+/g, '')     // buang karakter aneh
+    .replace(/\-\-+/g, '-');      // hilangkan --
+};
+
+const generateSlug = async (title) => {
+  const baseSlug = slugify(title);
+  let slug = baseSlug;
+  console.log(slug);
+  const exists = await Catalogues.count({ where: { slug:{[Op.like]: `${baseSlug}%`} } });
+  console.log(exists);
+  if (exists < 1) {
+    return slug;
+  }else{
+    slug = `${baseSlug}-${(exists+1)}`;
+    return slug;
+  }
+};
+
+exports.cataloguesOri = async (req, res) => {
+  const log = logger.loggerData({ req });
+
+  try {
+    // Ambil parameter page dan row_count dari query string
+    const page = req.query.page;
+    const rowCount = req.query.row_count;
+
+    const dataCatalogues = await cataloguesOri(page, rowCount);
+
+    const response = {
+      statusCode: dataCatalogues.statusCode,
+      status: dataCatalogues.status,
+      message: dataCatalogues.message,
+      transactioId: log.TransactionID,
+      totalData: dataCatalogues.totalData,
+      data: dataCatalogues.data,
+    };
+    logger.loggerData({
+      timeStart: log.TimeStamp,
+      req,
+      result: response,
+      flag: "STOP",
+      message: response.message,
+    });
+    res.status(dataCatalogues.statusCode).json(response);
+  } catch (error) {
+    // console.log(error);
+    logger.loggerData({
+      timeStart: log.TimeStamp,
+      req,
+      result: response500,
+      flag: "ERROR",
+      message: error.message,
+    });
+    response500.transactioId = log.TransactionID;
+    res.status(500).json(response500);
+  }
+};
+
+// catalogues by id
+exports.byCataloguesOri = async (req, res) => {
+  const log = logger.loggerData({ req });
+  const id = req.params.id;
+  if (id) {
+    try {
+      const dataCatalogues = await byCataloguesOri(id);
+
+      const response = {
+        statusCode: dataCatalogues.statusCode,
+        status: dataCatalogues.status,
+        message: dataCatalogues.message,
+        transactionId: log.TransactionID,
+        data: dataCatalogues.data,
+      };
+      logger.loggerData({
+        timeStart: log.TimeStamp,
+        req,
+        result: response,
+        flag: "STOP",
+        message: response.message,
+      });
+      res.status(dataCatalogues.statusCode).json(response);
+    } catch (error) {
+      logger.loggerData({
+        timeStart: log.TimeStamp,
+        req,
+        result: response500,
+        flag: "ERROR",
+        message: error.message,
+      });
+      response500.transactioId = log.TransactionID;
+      res.status(500).json(response500);
+    }
+  } else {
+    logger.loggerData({
+      timeStart: log.TimeStamp,
+      req,
+      result: response400,
+      flag: "STOP",
+      message: response400.message,
+    });
+    response400.transactioId = log.TransactionID;
+    res.status(400).json(response400);
+  }
+};
+// catalogues by where
+exports.byCataloguesWhereOri = async (req, res) => {
+  const log = logger.loggerData({ req });
+  const { id,group_s,lang,id_merk,id_category, status } = req.body;
+  // Ambil parameter page dan row_count dari query string
+  const page = req.query.page;
+  const rowCount = req.query.row_count;
+  try {
+    let whereClause = {};
+    // Cek jika parameter id_pengguna
+    if (id) {
+      whereClause.id = id;
+    }
+
+    // Cek jika parameter lang
+    if (lang) {
+      whereClause.lang = lang;
+    }
+    if (group_s) {
+      whereClause.group_s = group_s;
+    }
+    // Cek jika parameter id_merk
+    if (id_merk) {
+      whereClause.id_merk = id_merk;
+    }
+    // Cek jika parameter id_category
+    if (id_category) {
+      whereClause.id_category = id_category;
+    }
+    if (status) {
+      whereClause.status = status;
+    }
+    const databyCataloguesWhere = await byCataloguesWhereOri(whereClause, page, rowCount);
+
+    const response = {
+      statusCode: databyCataloguesWhere.statusCode,
+      status: databyCataloguesWhere.status,
+      message: databyCataloguesWhere.message,
+      transactionId: log.TransactionID,
+      totalData: databyCataloguesWhere.totalData,
+      data: databyCataloguesWhere.data,
+    };
+    logger.loggerData({
+      timeStart: log.TimeStamp,
+      req,
+      result: response,
+      flag: "STOP",
+      message: response.message,
+    });
+    res.status(databyCataloguesWhere.statusCode).json(response);
+  } catch (error) {
+    logger.loggerData({
+      timeStart: log.TimeStamp,
+      req,
+      result: response500,
+      flag: "ERROR",
+      message: error.message,
+    });
+    response500.transactioId = log.TransactionID;
+    res.status(500).json(response500);
+  }
 };
 
 exports.catalogues = async (req, res) => {
@@ -114,7 +292,7 @@ exports.byCatalogues = async (req, res) => {
 // catalogues by where
 exports.byCataloguesWhere = async (req, res) => {
   const log = logger.loggerData({ req });
-  const { id,lang,id_merek,id_category, status } = req.body;
+  const { id,group_s,lang,id_merk,id_category, status, name } = req.body;
   // Ambil parameter page dan row_count dari query string
   const page = req.query.page;
   const rowCount = req.query.row_count;
@@ -129,9 +307,12 @@ exports.byCataloguesWhere = async (req, res) => {
     if (lang) {
       whereClause.lang = lang;
     }
-    // Cek jika parameter id_merek
-    if (id_merek) {
-      whereClause.id_merek = id_merek;
+    if (group_s) {
+      whereClause.group_s = group_s;
+    }
+    // Cek jika parameter id_merk
+    if (id_merk) {
+      whereClause.id_merk = id_merk;
     }
     // Cek jika parameter id_category
     if (id_category) {
@@ -140,6 +321,9 @@ exports.byCataloguesWhere = async (req, res) => {
     if (status) {
       whereClause.status = status;
     }
+
+    if (name) whereClause.name = { [Op.like]: `%${name}%` };
+    
     const databyCataloguesWhere = await byCataloguesWhere(whereClause, page, rowCount);
 
     const response = {
@@ -182,6 +366,7 @@ exports.addCatalogues = async (req, res) => {
   });
 
   const {
+    group_s,
     lang,
     slug,
     name,
@@ -192,10 +377,14 @@ exports.addCatalogues = async (req, res) => {
     id_category,
     status,
   } = req.body;
+
+  const validSlug = await generateSlug(name);
+  console.log(validSlug);
   try {
     const dataCatalogues = {
+      group_s:group_s,
       lang:lang,
-      slug: slug,
+      slug: validSlug,
       name: name,
       id_merk: id_merk,
       description: description,
@@ -249,22 +438,27 @@ exports.updateCatalogues = async (req, res) => {
   // console.log(userLogin);
   const {
     id,
+    group_s,
     lang,
     slug,
     name,
-    id_merek,
+    id_merk,
     description,
     spec,
     image,
     id_category,
     status,
   } = req.body;
+
+  const validSlug = await generateSlug(name);
+  console.log(validSlug);
   try {
     const dataCatalogues = {
+        group_s:group_s,
         lang:lang,
-        slug: slug,
+        slug: validSlug,
         name: name,
-        id_merek: id_merek,
+        id_merk: id_merk,
         description: description,
         spec: spec,
         image: image,

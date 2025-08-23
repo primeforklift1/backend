@@ -215,12 +215,14 @@ const productController = require("./controllers/cataloguesController");
 const serviceController = require("./controllers/serviceController");
 const articleController = require("./controllers/articleController");
 const messageController = require("./controllers/messageController");
+const promosiController = require("./controllers/promosiController");
 
 app.get("/", limiter, (req, res) => {
   const log = logger.loggerData({ req });
   res.status(200).json({ status: "Sukses", message: "API Ready" });
 });
 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API Public and Management =====================================================================================================================
 
@@ -250,7 +252,9 @@ app.post(
     
 
     // kirim ke ci4
-    const fullFilePath = path.join(__dirname, "uploads", req.uploadedFileName);
+    const public_image = process.env.API_URL+':'+process.env.APP_PORT;
+    // const fullFilePath = path.join(public_image, "uploads", req.uploadedFileName);
+    const fullFilePath = public_image+"/uploads/"+req.uploadedFileName;
     console.log(fullFilePath);
     
     try {
@@ -258,8 +262,9 @@ app.post(
         const ci4Response = await axios.post(
           process.env.CLIENT_URL + '/copy-node-file',
           qs.stringify({
-            sourcePath: fullFilePath,
-            sourceDir: 'uploads/'
+            sourceUrl: fullFilePath,
+            sourceDir: 'uploads/',
+            targetDir: 'uploads/'
           }),
           {
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
@@ -554,6 +559,19 @@ app.delete(
 
 // API Product ===================================================
 app.get(
+  "/api/product-ori",
+  productController.cataloguesOri
+);
+
+app.get(
+  "/api/product-ori/:id",
+  productController.byCataloguesOri
+);
+app.post(
+  "/api/product-ori/where",
+  productController.byCataloguesWhereOri
+);
+app.get(
   "/api/product",
   productController.catalogues
 );
@@ -621,6 +639,19 @@ app.delete(
 
 // API Blog ===================================================
 app.get(
+  "/api/blog-ori",
+  articleController.articleOri
+);
+
+app.get(
+  "/api/blog-ori/:id",
+  articleController.byArticleOri
+);
+app.post(
+  "/api/blog-ori/where",
+  articleController.byArticleWhereOri
+);
+app.get(
   "/api/blog",
   articleController.article
 );
@@ -669,7 +700,7 @@ app.post(
 app.post(
   "/admin/message",
   limiter,
-  authenticateToken("Admin Sistem"),
+  // authenticateToken("Admin Sistem"),
   messageController.addMessage
 );
 app.put(
@@ -683,6 +714,38 @@ app.delete(
   limiter,
   authenticateToken("Admin Sistem"),
   messageController.deleteMessage
+);
+
+// API Promosi =================================================
+app.get(
+  "/api/promosi",
+  promosiController.promosi
+);
+app.get(
+  "/api/promosi/:id",
+  promosiController.byPromosi
+);
+app.post(
+  "/api/promosi/where",
+  promosiController.byPromosiWhere
+);
+app.post(
+  "/admin/promosi",
+  limiter,
+  authenticateToken("Admin Sistem"),
+  promosiController.addPromosi
+);
+app.put(
+  "/admin/promosi",
+  limiter,
+  authenticateToken("Admin Sistem"),
+  promosiController.updatePromosi
+);
+app.delete(
+  "/admin/promosi/:id",
+  limiter,
+  authenticateToken("Admin Sistem"),
+  promosiController.deletePromosi
 );
 
 
